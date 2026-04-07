@@ -415,34 +415,37 @@ function scheduleCallouts(){clearInterval(identTimer);identTimer=setInterval(()=
 // ─────────────────────────────────────────────
 // SOUNDCLOUD WIDGET
 // ─────────────────────────────────────────────
-let widget=null,playing=false,eqTimer=null,widgetPreloaded=false;
+let widget=null,playing=false,eqTimer=null;
 const btn=document.getElementById('playBtn');
 const eq=document.getElementById('eq');
 const np=document.getElementById('nowPlaying');
 const bars=document.querySelectorAll('.eq-bar');
 const attrEl=document.getElementById('attribution');
 
-function initWidget(track,offsetSecs,autoplay) {
-  const frame=document.getElementById('sc-frame');
-  const shouldAutoplay=isIOS?true:autoplay;
-  frame.src=`https://w.soundcloud.com/player/?url=${encodeURIComponent(track.url)}&auto_play=${shouldAutoplay}&buying=false&liking=false&download=false&sharing=false&show_artwork=false&show_comments=false&show_playcount=false&show_user=false&hide_related=true&visual=false&color=%23c8503a`;
-  widget=SC.Widget(frame);
-  widget.bind(SC.Widget.Events.READY,()=>{
-    updateNowPlaying(track,offsetSecs);
-    if(isIOS&&offsetSecs>5){
-      setTimeout(()=>widget.seekTo(offsetSecs*1000),1500);
-    } else {
-      if(offsetSecs>0) widget.seekTo(offsetSecs*1000);
-      if(autoplay) widget.play();
+function initWidget(track, offsetSecs, autoplay) {
+  const frame = document.getElementById('sc-frame');
+  frame.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(track.url) +
+    '&auto_play=false&buying=false&liking=false&download=false&sharing=false' +
+    '&show_artwork=false&show_comments=false&show_playcount=false' +
+    '&show_user=false&hide_related=true&visual=false&color=%23c8503a';
+  widget = SC.Widget(frame);
+  widget.bind(SC.Widget.Events.READY, function() {
+    updateNowPlaying(track, offsetSecs);
+    if (offsetSecs > 0) {
+      widget.seekTo(offsetSecs * 1000);
+    }
+    if (autoplay) {
+      // Small delay ensures seek completes before play
+      setTimeout(function() { widget.play(); }, 300);
     }
   });
-  widget.bind(SC.Widget.Events.FINISH,()=>{
-    currentIndex=(currentIndex+1)%tracks.length;
-    stationIdent(()=>initWidget(tracks[currentIndex],0,true));
+  widget.bind(SC.Widget.Events.FINISH, function() {
+    currentIndex = (currentIndex + 1) % tracks.length;
+    stationIdent(function() { initWidget(tracks[currentIndex], 0, true); });
   });
-  widget.bind(SC.Widget.Events.ERROR,()=>{
-    currentIndex=(currentIndex+1)%tracks.length;
-    initWidget(tracks[currentIndex],0,true);
+  widget.bind(SC.Widget.Events.ERROR, function() {
+    currentIndex = (currentIndex + 1) % tracks.length;
+    initWidget(tracks[currentIndex], 0, true);
   });
 }
 
@@ -470,22 +473,12 @@ function updateNowPlaying(track,offsetSecs) {
 }
 
 async function togglePlay() {
-  if (!playing) {
-    btn.classList.add('playing'); eq.classList.add('active');
-    np.classList.add('visible');
+  // ── FIRST PLAY ──
+  if (!libraryLoaded) {
+    btn.classList.add('playing'); eq.classList.add('active'); np.classList.add('visible');
+    document.getElementById('npTitle').innerHTML = '<span class="loading-text">Syncing transmission</span>';
     playing = true;
     window.speechSynthesis.getVoices();
-
-    if (widgetPreloaded && widget) {
-      // ✅ SAFARI PATH: widget already warm, just play — fully synchronous
-      updateNowPlaying(tracks[currentIndex], startOffset);
-      widget.play();
-      runEQ(); scheduleCallouts();
-      return;
-    }
-
-    // Widget not ready yet — show loading and wait
-    document.getElementById('npTitle').innerHTML = '<span class="loading-text">Syncing transmission</span>';
     const ok = await fetchLibrary();
     if (!ok || !tracks.length) {
       document.getElementById('npTitle').textContent = 'No mixes found — add some in Airtable';
@@ -495,18 +488,16 @@ async function togglePlay() {
     runEQ(); scheduleCallouts();
     return;
   }
+
+  // ── PAUSE / RESUME ──
   playing = !playing;
   if (playing) {
-    if (tracks.length) {
-      const sync = getSyncPosition(tracks);
-      if (Math.abs(sync.index - currentIndex) > 0 || Math.abs(sync.offsetSeconds - startOffset) > 30) {
-        currentIndex = sync.index;
-        initWidget(tracks[currentIndex], sync.offsetSeconds, true);
-      } else { widget.play(); }
+    if (widget) {
+      widget.play();
     }
     btn.classList.add('playing'); eq.classList.add('active'); runEQ(); scheduleCallouts();
   } else {
-    widget.pause();
+    if (widget) widget.pause();
     btn.classList.remove('playing'); eq.classList.remove('active');
     clearTimeout(eqTimer); clearInterval(identTimer);
     bars.forEach(b => b.style.height = '3px');
@@ -536,10 +527,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closePopup();});
 window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
 highlightSlot();
 
-// Silently pre-fetch the library on page load
-// so Airtable data is ready before the user taps play
-// This reduces the async gap on iOS significantly
-fetchLibrary().catch(()=>{});
+// Pre-fetch library silently on page load
+// Reduces async delay when user taps play
+fetchLibrary().catch(function(){});
 </script>
 </body>
 </html>
