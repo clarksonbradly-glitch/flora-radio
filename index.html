@@ -350,9 +350,14 @@ function formatTime(s) {
 // ─────────────────────────────────────────────
 let tracks=[],currentIndex=0,startOffset=0,libraryLoaded=false;
 
+let _fetchPromise = null;
 async function fetchLibrary() {
-  // Return immediately if already loaded - critical for iOS tap gesture timing
   if (libraryLoaded && tracks.length) return true;
+  if (_fetchPromise) return _fetchPromise;
+  _fetchPromise = _doFetch();
+  return _fetchPromise;
+}
+async function _doFetch() {
   try {
     const res=await fetch(`/api/library?bucket=${encodeURIComponent(getCurrentBucket())}`);
     const data=await res.json();
@@ -372,7 +377,7 @@ async function fetchLibrary() {
     startOffset=sync.offsetSeconds;
     libraryLoaded=true;
     return true;
-  } catch(e){console.error(e);return false;}
+  } catch(e){console.error(e);_fetchPromise=null;return false;}
 }
 
 // ─────────────────────────────────────────────
@@ -410,7 +415,7 @@ function scheduleCallouts(){clearInterval(identTimer);identTimer=setInterval(()=
 // ─────────────────────────────────────────────
 // SOUNDCLOUD WIDGET
 // ─────────────────────────────────────────────
-let widget=null,playing=false,eqTimer=null;
+let widget=null,playing=false,eqTimer=null,widgetPreloaded=false;
 const btn=document.getElementById('playBtn');
 const eq=document.getElementById('eq');
 const np=document.getElementById('nowPlaying');
@@ -465,12 +470,22 @@ function updateNowPlaying(track,offsetSecs) {
 }
 
 async function togglePlay() {
-  if (!playing && !libraryLoaded) {
-    btn.classList.add('playing'); eq.classList.add('active'); np.classList.add('visible');
-    document.getElementById('npTitle').innerHTML = '<span class="loading-text">Syncing transmission</span>';
+  if (!playing) {
+    btn.classList.add('playing'); eq.classList.add('active');
+    np.classList.add('visible');
     playing = true;
     window.speechSynthesis.getVoices();
-    // If prefetch already ran in background, this resolves instantly
+
+    if (widgetPreloaded && widget) {
+      // ✅ SAFARI PATH: widget already warm, just play — fully synchronous
+      updateNowPlaying(tracks[currentIndex], startOffset);
+      widget.play();
+      runEQ(); scheduleCallouts();
+      return;
+    }
+
+    // Widget not ready yet — show loading and wait
+    document.getElementById('npTitle').innerHTML = '<span class="loading-text">Syncing transmission</span>';
     const ok = await fetchLibrary();
     if (!ok || !tracks.length) {
       document.getElementById('npTitle').textContent = 'No mixes found — add some in Airtable';
