@@ -7,101 +7,174 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root { --cream: #f5f2ec; --ink: #111010; --dust: #000000; --accent: #c8503a; }
-  html, body { height: 100%; background: var(--cream); color: var(--ink); font-family: 'Cormorant Garamond', Georgia, serif; }
-  body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:50; opacity:0.45; }
 
-  .page { height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:13vh 2rem 8vh; text-align:center; }
+  /* ── THEMES ── */
+  :root {
+    --bg: #f5f2ec;
+    --ink: #111010;
+    --soft: #3a3530;
+    --accent: #c8503a;
+    --border: rgba(17,16,16,0.15);
+  }
 
+  /* Morning: warm cream, sunrise gold */
+  body.theme-morning {
+    --bg: #f0e8d8;
+    --ink: #1a1208;
+    --soft: #3d2e1a;
+    --accent: #c8712a;
+    --border: rgba(60,40,10,0.2);
+    background: var(--bg);
+  }
+  body.theme-morning::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 110%, rgba(220,160,60,0.25) 0%, transparent 70%),
+                radial-gradient(ellipse at 20% 80%, rgba(200,120,40,0.12) 0%, transparent 50%);
+  }
+
+  /* Ascent: deep charcoal, electric energy */
+  body.theme-ascent {
+    --bg: #0e0c0a;
+    --ink: #f0ece4;
+    --soft: #c8bfb0;
+    --accent: #e05a3a;
+    --border: rgba(240,236,228,0.15);
+    background: var(--bg);
+  }
+  body.theme-ascent::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,80,40,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 100%, rgba(180,60,20,0.1) 0%, transparent 50%);
+  }
+
+  /* Descent: deep midnight blue, mysterious */
+  body.theme-descent {
+    --bg: #080c14;
+    --ink: #e8eaf0;
+    --soft: #9aa0b8;
+    --accent: #6070c8;
+    --border: rgba(232,234,240,0.12);
+    background: var(--bg);
+  }
+  body.theme-descent::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 30% 20%, rgba(80,90,180,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(40,50,120,0.12) 0%, transparent 50%);
+  }
+
+  html, body {
+    height: 100%;
+    color: var(--ink);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    transition: background 1.2s ease, color 1.2s ease;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+    opacity: 0.5;
+  }
+
+  .page {
+    position: relative; z-index: 2;
+    height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: 13vh 2rem 8vh; text-align: center;
+  }
+
+  /* ── BRAND ── */
   .brand { display:flex; flex-direction:column; align-items:center; gap:0.85rem; animation:rise 1.4s ease both; }
-  .logo { display:flex; align-items:center; justify-content:center; font-size:clamp(3rem,10.5vw,5.2rem); font-weight:300; text-transform:uppercase; color:var(--ink); line-height:1; }
+  .logo { display:flex; align-items:center; justify-content:center; font-size:clamp(3rem,10.5vw,5.2rem); font-weight:300; text-transform:uppercase; color:var(--ink); line-height:1; transition:color 1.2s ease; }
   .ll { display:inline-block; margin-right:0.38em; }
   .ll:last-child { margin-right:0; }
   .logo-o { display:inline-flex; align-items:center; justify-content:center; width:0.72em; height:0.72em; margin-right:0.38em; position:relative; top:0.04em; flex-shrink:0; }
   .logo-o svg { width:100%; height:100%; overflow:visible; }
-  .s1,.s2,.s3,.s4 { fill:none; stroke:var(--accent); stroke-linecap:round; stroke-linejoin:round; }
+  .s1,.s2,.s3,.s4 { fill:none; stroke:var(--accent); stroke-linecap:round; stroke-linejoin:round; transition:stroke 1.2s ease; }
   .s1 { stroke-width:3.5; stroke-dasharray:290; stroke-dashoffset:290; animation:draw 1s cubic-bezier(.4,0,.2,1) .4s forwards; }
   .s2 { stroke-width:1.8; stroke-dasharray:310; stroke-dashoffset:310; animation:draw 1.1s cubic-bezier(.4,0,.2,1) .55s forwards; opacity:.55; }
   .s3 { stroke-width:1.2; stroke-dasharray:270; stroke-dashoffset:270; animation:draw .9s cubic-bezier(.4,0,.2,1) .7s forwards; opacity:.35; }
   .s4 { stroke-width:.8; stroke-dasharray:180; stroke-dashoffset:180; animation:draw .75s cubic-bezier(.4,0,.2,1) .85s forwards; opacity:.2; }
   @keyframes draw { to { stroke-dashoffset:0; } }
-  .subline { font-size:clamp(.7rem,1.8vw,.82rem); letter-spacing:.28em; padding-left:.28em; text-transform:uppercase; color:#000000; font-weight:400; }
 
+  .subline { font-size:clamp(.7rem,1.8vw,.82rem); letter-spacing:.28em; padding-left:.28em; text-transform:uppercase; color:var(--ink); font-weight:400; opacity:0.7; transition:color 1.2s ease; }
+
+  /* ── SLOT ICON ── */
+  .slot-icon { font-size:1.4rem; margin-bottom:0.4rem; opacity:0.6; animation:rise 1.4s ease .1s both; }
+
+  /* ── PLAYER ── */
   .player { display:flex; flex-direction:column; align-items:center; animation:rise 1.4s ease .2s both; }
   .eq { display:flex; align-items:flex-end; justify-content:center; gap:3px; height:22px; margin-bottom:1.4rem; opacity:0; transition:opacity .7s ease; }
   .eq.active { opacity:1; }
-  .eq-bar { width:2px; background:var(--ink); border-radius:2px 2px 0 0; height:3px; transition:height .09s ease; }
+  .eq-bar { width:2px; background:var(--accent); border-radius:2px 2px 0 0; height:3px; transition:height .09s ease, background 1.2s ease; }
 
-  .play-btn { width:68px; height:68px; border-radius:50%; border:1px solid var(--ink); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; position:relative; transition:border-color .3s,transform .3s; outline:none; -webkit-tap-highlight-color:transparent; }
-  .play-btn::before { content:''; position:absolute; width:82px; height:82px; border-radius:50%; border:1px solid rgba(17,16,16,.2); }
+  .play-btn { width:68px; height:68px; border-radius:50%; border:1.5px solid var(--ink); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; position:relative; transition:border-color .3s,transform .3s, border 1.2s ease; outline:none; -webkit-tap-highlight-color:transparent; }
+  .play-btn::before { content:''; position:absolute; width:82px; height:82px; border-radius:50%; border:1px solid var(--border); transition:border 1.2s ease; }
   .play-btn:hover { border-color:var(--accent); transform:scale(1.04); }
   .play-btn.playing { border-color:var(--accent); }
-  .play-btn.playing::before { animation:breathe 2.6s ease-in-out infinite; border-color:rgba(200,80,58,.22); }
-  @keyframes breathe { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.14);opacity:.2;} }
+  .play-btn.playing::before { animation:breathe 2.6s ease-in-out infinite; border-color:var(--accent); opacity:0.3; }
+  @keyframes breathe { 0%,100%{transform:scale(1);opacity:.3;} 50%{transform:scale(1.14);opacity:.1;} }
 
-  .icon-play { width:0; height:0; border-top:9px solid transparent; border-bottom:9px solid transparent; border-left:15px solid var(--ink); margin-left:4px; }
+  .icon-play { width:0; height:0; border-top:9px solid transparent; border-bottom:9px solid transparent; border-left:15px solid var(--ink); margin-left:4px; transition:border-left-color 1.2s ease; }
   .icon-pause { display:none; gap:5px; align-items:center; }
-  .icon-pause span { display:block; width:3px; height:14px; background:var(--accent); border-radius:1px; }
+  .icon-pause span { display:block; width:3px; height:14px; background:var(--accent); border-radius:1px; transition:background 1.2s ease; }
   .play-btn.playing .icon-play { display:none; }
   .play-btn.playing .icon-pause { display:flex; }
 
   .now-playing { margin-top:1.4rem; opacity:0; transform:translateY(4px); transition:opacity .5s ease .1s,transform .5s ease .1s; min-height:3.5rem; }
   .now-playing.visible { opacity:1; transform:translateY(0); }
-  .np-label { font-size:.72rem; letter-spacing:.24em; text-transform:uppercase; color:#000000; margin-bottom:.28rem; }
-  .np-title { font-size:clamp(1.2rem,3.5vw,1.5rem); font-weight:400; letter-spacing:.04em; color:var(--ink); font-style:italic; }
-  .np-meta { font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:#000000; margin-top:.25rem; }
-  .np-progress { margin-top:.5rem; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); opacity:.7; }
+  .np-label { font-size:.72rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ink); margin-bottom:.28rem; opacity:0.7; transition:color 1.2s ease; }
+  .np-title { font-size:clamp(1.2rem,3.5vw,1.5rem); font-weight:400; letter-spacing:.04em; color:var(--ink); font-style:italic; transition:color 1.2s ease; }
+  .np-meta { font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink); margin-top:.25rem; opacity:0.8; transition:color 1.2s ease; }
+  .np-progress { margin-top:.5rem; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); opacity:.9; transition:color 1.2s ease; }
 
-  .ident-dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin-left:.5rem; vertical-align:middle; opacity:0; transition:opacity .3s; }
+  .ident-dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin-left:.5rem; vertical-align:middle; opacity:0; transition:opacity .3s, background 1.2s ease; }
   .ident-dot.speaking { opacity:1; animation:blink .6s ease-in-out infinite; }
   @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.2;} }
 
   .attribution { margin-top:1rem; opacity:0; transform:translateY(4px); transition:opacity .5s ease .2s,transform .5s ease .2s; }
   .attribution.visible { opacity:1; transform:translateY(0); }
-  .attr-link { font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:#000000; text-decoration:none; border-bottom:1px solid rgba(17,16,16,.2); padding-bottom:1px; transition:color .2s,border-color .2s; }
-  .attr-link:hover { color:var(--accent); border-color:var(--accent); }
-  .attr-divider { margin:0 .6rem; color:#000000; opacity:.4; font-size:.44rem; }
-  .attr-disclaimer { display:block; margin-top:.4rem; font-size:.56rem; letter-spacing:.12em; text-transform:uppercase; color:#000000; opacity:1; font-style:italic; }
+  .attr-link { font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); text-decoration:none; border-bottom:1px solid var(--border); padding-bottom:1px; transition:color .2s, border-color 1.2s ease; }
+  .attr-link:hover { color:var(--accent); }
+  .attr-divider { margin:0 .6rem; color:var(--ink); opacity:.4; font-size:.64rem; }
+  .attr-disclaimer { display:block; margin-top:.4rem; font-size:.56rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink); opacity:0.6; font-style:italic; transition:color 1.2s ease; }
 
-  .loading-text { font-size:.48rem; letter-spacing:.2em; text-transform:uppercase; color:#000000; font-style:normal; animation:pulse 1.5s ease-in-out infinite; }
+  .loading-text { font-size:.48rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); font-style:normal; animation:pulse 1.5s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:.4;} 50%{opacity:1;} }
 
-  /* SC iframe — visible 1px strip at bottom on ALL devices for Safari compatibility */
-  #sc-frame {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    border: none;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 1;
-  }
+  #sc-frame { position:fixed; bottom:0; left:0; width:100%; height:1px; border:none; opacity:0; pointer-events:none; z-index:1; }
 
-  .schedule { display:flex; flex-direction:row; align-items:center; justify-content:center; width:100%; max-width:480px; animation:rise 1.4s ease .4s both; }
-  .sched-item { display:flex; flex-direction:column; align-items:center; gap:.25rem; flex:1; cursor:pointer; padding:.5rem .4rem; transition:opacity .2s; -webkit-tap-highlight-color:transparent; }
-  .sched-item:hover { opacity:.6; }
-  .sched-item+.sched-item { border-left:1px solid rgba(17,16,16,.12); }
-  .sched-time { font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:#000000; white-space:nowrap; }
-  .sched-genre { font-size:.88rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); font-weight:400; white-space:nowrap; }
-  .sched-hint { width:12px; height:1px; background:rgba(17,16,16,.2); margin-top:.2rem; transition:width .3s ease,background .3s; }
+  /* ── SCHEDULE ── */
+  .schedule { display:flex; flex-direction:row; align-items:center; justify-content:center; width:100%; max-width:520px; animation:rise 1.4s ease .4s both; }
+  .sched-item { display:flex; flex-direction:column; align-items:center; gap:.2rem; flex:1; cursor:pointer; padding:.6rem .4rem; transition:opacity .2s; -webkit-tap-highlight-color:transparent; }
+  .sched-item:hover { opacity:.7; }
+  .sched-item+.sched-item { border-left:1px solid var(--border); }
+  .sched-icon { font-size:1rem; opacity:0.6; margin-bottom:.1rem; }
+  .sched-time { font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); white-space:nowrap; opacity:0.7; transition:color 1.2s ease; }
+  .sched-genre { font-size:.88rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); font-weight:400; white-space:nowrap; transition:color 1.2s ease; }
+  .sched-hint { width:12px; height:1px; background:var(--border); margin-top:.25rem; transition:width .3s ease, background .3s; }
   .sched-item:hover .sched-hint { width:20px; background:var(--accent); }
   .sched-item.now-slot .sched-genre { color:var(--accent); }
   .sched-item.now-slot .sched-hint { width:20px; background:var(--accent); }
+  .sched-item.now-slot .sched-time { color:var(--accent); opacity:1; }
 
+  /* ── POPUP ── */
   .overlay { position:fixed; inset:0; z-index:200; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; padding:0 1rem 2rem; }
   .overlay.open { pointer-events:all; }
-  .overlay-backdrop { position:fixed; inset:0; background:rgba(245,242,236,0); transition:background .35s ease; z-index:-1; }
-  .overlay.open .overlay-backdrop { background:rgba(245,242,236,.75); }
-  .popup { width:100%; max-width:420px; background:var(--cream); border:1px solid rgba(17,16,16,.13); border-radius:2px; padding:2rem 2rem 1.8rem; text-align:center; transform:translateY(24px); opacity:0; transition:transform .38s cubic-bezier(.22,1,.36,1),opacity .3s ease; box-shadow:0 4px 32px rgba(17,16,16,.07); position:relative; }
+  .overlay-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0); transition:background .35s ease; z-index:-1; }
+  .overlay.open .overlay-backdrop { background:rgba(0,0,0,0.5); }
+  .popup { width:100%; max-width:420px; background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:2rem 2rem 1.8rem; text-align:center; transform:translateY(24px); opacity:0; transition:transform .38s cubic-bezier(.22,1,.36,1),opacity .3s ease, background 1.2s ease; box-shadow:0 8px 40px rgba(0,0,0,0.2); position:relative; }
   .overlay.open .popup { transform:translateY(0); opacity:1; }
-  .popup-time { font-size:.44rem; letter-spacing:.22em; text-transform:uppercase; color:#000000; margin-bottom:.5rem; }
+  .popup-time { font-size:.56rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink); margin-bottom:.5rem; opacity:0.7; }
   .popup-title { font-size:clamp(1.3rem,4vw,1.7rem); font-weight:300; letter-spacing:.08em; color:var(--ink); margin-bottom:.9rem; line-height:1.1; }
   .popup-rule { width:28px; height:1px; background:var(--accent); margin:0 auto 1rem; }
-  .popup-body { font-size:clamp(.82rem,2vw,.92rem); font-weight:300; line-height:1.75; color:rgba(17,16,16,.72); font-style:italic; }
-  .popup-close { position:absolute; top:1rem; right:1.2rem; background:none; border:none; cursor:pointer; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#000000; font-family:'Cormorant Garamond',serif; transition:color .2s; outline:none; }
-  .popup-close:hover { color:var(--ink); }
+  .popup-body { font-size:clamp(.82rem,2vw,.92rem); font-weight:300; line-height:1.75; color:var(--ink); opacity:0.8; font-style:italic; }
+  .popup-close { position:absolute; top:1rem; right:1.2rem; background:none; border:none; cursor:pointer; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); font-family:'Cormorant Garamond',serif; transition:color .2s; outline:none; opacity:0.6; }
+  .popup-close:hover { opacity:1; color:var(--accent); }
 
   @keyframes rise { from{opacity:0;transform:translateY(9px);} to{opacity:1;transform:translateY(0);} }
 </style>
@@ -110,6 +183,7 @@
 
 <div class="page">
   <div class="brand">
+    <div class="slot-icon" id="slotIcon">✦</div>
     <div class="logo">
       <span class="ll">F</span><span class="ll">L</span>
       <span class="logo-o">
@@ -156,16 +230,19 @@
 
   <div class="schedule">
     <div class="sched-item" id="slot-day" onclick="openPopup('day')">
+      <div class="sched-icon">☀️</div>
       <div class="sched-time">7AM – 12PM</div>
       <div class="sched-genre">Morning Drift</div>
       <div class="sched-hint"></div>
     </div>
     <div class="sched-item" id="slot-evening" onclick="openPopup('evening')">
+      <div class="sched-icon">↗</div>
       <div class="sched-time">12PM – 2AM</div>
       <div class="sched-genre">The Ascent</div>
       <div class="sched-hint"></div>
     </div>
     <div class="sched-item" id="slot-night" onclick="openPopup('night')">
+      <div class="sched-icon">🌙</div>
       <div class="sched-time">2AM – 7AM</div>
       <div class="sched-genre">The Descent</div>
       <div class="sched-hint"></div>
@@ -173,7 +250,6 @@
   </div>
 </div>
 
-<!-- Sits in visible DOM at 1px — required for iOS Safari audio unlock -->
 <iframe id="sc-frame" allow="autoplay" scrolling="no" frameborder="no"></iframe>
 
 <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
@@ -196,19 +272,36 @@ const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 // ─────────────────────────────────────────────
-// BUCKET HELPERS
+// THEME ENGINE
+// ─────────────────────────────────────────────
+const themes = {
+  'Morning':   { cls:'theme-morning', icon:'☀️' },
+  'Afternoon': { cls:'theme-ascent',  icon:'✦'  },
+  'Late Night':{ cls:'theme-descent', icon:'🌙' }
+};
+
+function applyTheme(bucket) {
+  const t = themes[bucket] || themes['Morning'];
+  document.body.className = t.cls;
+  document.getElementById('slotIcon').textContent = t.icon;
+}
+
+// ─────────────────────────────────────────────
+// BUCKET / TIME HELPERS
 // ─────────────────────────────────────────────
 function getCurrentBucket() {
   const h = new Date().getHours();
   if (h >= 7 && h < 12) return 'Morning';
-  if ((h >= 12 && h < 24) || (h === 0) || (h >= 1 && h < 2)) return 'Afternoon';
-  return 'Late Night';
+  if (h >= 2 && h < 7)  return 'Late Night';
+  return 'Afternoon';
 }
 
 function highlightSlot() {
+  const b = getCurrentBucket();
   document.querySelectorAll('.sched-item').forEach(el => el.classList.remove('now-slot'));
   const map = { 'Morning':'slot-day','Afternoon':'slot-evening','Late Night':'slot-night' };
-  document.getElementById(map[getCurrentBucket()])?.classList.add('now-slot');
+  document.getElementById(map[b])?.classList.add('now-slot');
+  applyTheme(b);
 }
 
 // ─────────────────────────────────────────────
@@ -232,7 +325,7 @@ function shuffleWithSeed(arr,seed) {
 // 24/7 SYNC ENGINE
 // ─────────────────────────────────────────────
 function getSyncPosition(tracks) {
-  const now=new Date(), midnight=new Date(now);
+  const now=new Date(),midnight=new Date(now);
   midnight.setHours(0,0,0,0);
   const secondsToday=Math.floor((now-midnight)/1000);
   const totalDuration=tracks.reduce((sum,t)=>sum+(t.duration*60),0);
@@ -314,9 +407,6 @@ function scheduleCallouts(){clearInterval(identTimer);identTimer=setInterval(()=
 
 // ─────────────────────────────────────────────
 // SOUNDCLOUD WIDGET
-// iOS FIX: load iframe with auto_play=true first,
-// let audio unlock, THEN seek to offset position
-// after a safe delay
 // ─────────────────────────────────────────────
 let widget=null,playing=false,eqTimer=null;
 const btn=document.getElementById('playBtn');
@@ -325,47 +415,31 @@ const np=document.getElementById('nowPlaying');
 const bars=document.querySelectorAll('.eq-bar');
 const attrEl=document.getElementById('attribution');
 
-function initWidget(track, offsetSecs, autoplay) {
+function initWidget(track,offsetSecs,autoplay) {
   const frame=document.getElementById('sc-frame');
-
-  // On iOS: always set auto_play=true in URL to chain from user gesture
-  // On desktop: respect the autoplay param
-  const shouldAutoplay = isIOS ? true : autoplay;
-
+  const shouldAutoplay=isIOS?true:autoplay;
   frame.src=`https://w.soundcloud.com/player/?url=${encodeURIComponent(track.url)}&auto_play=${shouldAutoplay}&buying=false&liking=false&download=false&sharing=false&show_artwork=false&show_comments=false&show_playcount=false&show_user=false&hide_related=true&visual=false&color=%23c8503a`;
-
   widget=SC.Widget(frame);
-
   widget.bind(SC.Widget.Events.READY,()=>{
     updateNowPlaying(track,offsetSecs);
-
-    if(isIOS && offsetSecs > 5) {
-      // iOS strategy:
-      // 1. Let audio start playing from beginning (auto_play=true already set)
-      // 2. Wait 1.5s for Safari to fully unlock audio context
-      // 3. Then seek to correct position — seek works after audio is unlocked
-      setTimeout(()=>{
-        widget.seekTo(offsetSecs * 1000);
-      }, 1500);
+    if(isIOS&&offsetSecs>5){
+      setTimeout(()=>widget.seekTo(offsetSecs*1000),1500);
     } else {
-      // Desktop: seek immediately then play
-      if(offsetSecs > 0) widget.seekTo(offsetSecs * 1000);
+      if(offsetSecs>0) widget.seekTo(offsetSecs*1000);
       if(autoplay) widget.play();
     }
   });
-
   widget.bind(SC.Widget.Events.FINISH,()=>{
     currentIndex=(currentIndex+1)%tracks.length;
     stationIdent(()=>initWidget(tracks[currentIndex],0,true));
   });
-
   widget.bind(SC.Widget.Events.ERROR,()=>{
     currentIndex=(currentIndex+1)%tracks.length;
     initWidget(tracks[currentIndex],0,true);
   });
 }
 
-function updateNowPlaying(track,offsetSecs){
+function updateNowPlaying(track,offsetSecs) {
   document.getElementById('npTitle').textContent=`${track.artist} — ${track.title}`;
   document.getElementById('npMeta').textContent=`${track.event}  ·  ${track.year}`;
   document.getElementById('attrSoundcloud').href=track.url;
@@ -380,7 +454,7 @@ function updateNowPlaying(track,offsetSecs){
   attrEl.classList.add('visible');
 }
 
-async function togglePlay(){
+async function togglePlay() {
   if(!playing&&!libraryLoaded){
     btn.classList.add('playing');eq.classList.add('active');np.classList.add('visible');
     document.getElementById('npTitle').innerHTML='<span class="loading-text">Syncing transmission</span>';
@@ -395,7 +469,6 @@ async function togglePlay(){
     runEQ();scheduleCallouts();
     return;
   }
-
   playing=!playing;
   if(playing){
     if(tracks.length){
@@ -403,9 +476,7 @@ async function togglePlay(){
       if(Math.abs(sync.index-currentIndex)>0||Math.abs(sync.offsetSeconds-startOffset)>30){
         currentIndex=sync.index;
         initWidget(tracks[currentIndex],sync.offsetSeconds,true);
-      } else {
-        widget.play();
-      }
+      } else { widget.play(); }
     }
     btn.classList.add('playing');eq.classList.add('active');runEQ();scheduleCallouts();
   } else {
@@ -427,9 +498,9 @@ function runEQ(){
 // SCHEDULE POPUPS
 // ─────────────────────────────────────────────
 const slots={
-  day:    {time:'9AM – 5PM',     title:'Soft Drift', body:'The long, unhurried hours. Deep house at café tempo — warm chords, distant Rhodes, the kind of music that belongs beside an open window. Ibiza-style chill-out woven with organic textures, afro house grooves, and the occasional slow-burning balearic edit. For drifting, not arriving.'},
-  evening:{time:'12PM – 2AM',title:'The Ascent',  body:'The energy builds. Peak-time house and driving techno for the transition from daylight to dark — Ibiza prime time, terrace anthems, Chicago-rooted rhythm with a Berlin edge. Expect names both legendary and rising: the floor starts filling and the tempo climbs with it.'},
-  night:  {time:'2AM – 7AM',title:'The Descent', body:'After the peak, the interior. Minimal techno, dark ambient, and stripped-back house for the deep hours — instrumental, hypnotic, unresolved. This is music that moves without destination. No vocals, no rush. Only the low end and the space between.'}
+  day:    {time:'7AM – 12PM',    title:'Morning Drift',body:'The long, unhurried hours. Deep house at café tempo — warm chords, distant Rhodes, the kind of music that belongs beside an open window. Ibiza-style chill-out woven with organic textures, afro house grooves, and the occasional slow-burning balearic edit. For drifting, not arriving.'},
+  evening:{time:'12PM – 2AM',   title:'The Ascent',   body:'The energy builds. Peak-time house and driving techno for the transition from daylight to dark — Ibiza prime time, terrace anthems, Chicago-rooted rhythm with a Berlin edge. Expect names both legendary and rising: the floor starts filling and the tempo climbs with it.'},
+  night:  {time:'2AM – 7AM',    title:'The Descent',  body:'After the peak, the interior. Minimal techno, dark ambient, and stripped-back house for the deep hours — instrumental, hypnotic, unresolved. This is music that moves without destination. No vocals, no rush. Only the low end and the space between.'}
 };
 const overlay=document.getElementById('overlay');
 function openPopup(s){const sl=slots[s];document.getElementById('popupTime').textContent=sl.time;document.getElementById('popupTitle').textContent=sl.title;document.getElementById('popupBody').textContent=sl.body;overlay.classList.add('open');document.body.style.overflow='hidden';}
