@@ -156,17 +156,17 @@
 
   <div class="schedule">
     <div class="sched-item" id="slot-day" onclick="openPopup('day')">
-      <div class="sched-time">9AM – 5PM</div>
-      <div class="sched-genre">Soft Drift</div>
+      <div class="sched-time">7AM – 12PM</div>
+      <div class="sched-genre">Morning Drift</div>
       <div class="sched-hint"></div>
     </div>
     <div class="sched-item" id="slot-evening" onclick="openPopup('evening')">
-      <div class="sched-time">5PM – Midnight</div>
+      <div class="sched-time">12PM – 2AM</div>
       <div class="sched-genre">The Ascent</div>
       <div class="sched-hint"></div>
     </div>
     <div class="sched-item" id="slot-night" onclick="openPopup('night')">
-      <div class="sched-time">Midnight – 9AM</div>
+      <div class="sched-time">2AM – 7AM</div>
       <div class="sched-genre">The Descent</div>
       <div class="sched-hint"></div>
     </div>
@@ -200,8 +200,8 @@ const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
 // ─────────────────────────────────────────────
 function getCurrentBucket() {
   const h = new Date().getHours();
-  if (h >= 9  && h < 17) return 'Morning';
-  if (h >= 17 && h < 24) return 'Afternoon';
+  if (h >= 7 && h < 12) return 'Morning';
+  if ((h >= 12 && h < 24) || (h === 0) || (h >= 1 && h < 2)) return 'Afternoon';
   return 'Late Night';
 }
 
@@ -428,8 +428,8 @@ function runEQ(){
 // ─────────────────────────────────────────────
 const slots={
   day:    {time:'9AM – 5PM',     title:'Soft Drift', body:'The long, unhurried hours. Deep house at café tempo — warm chords, distant Rhodes, the kind of music that belongs beside an open window. Ibiza-style chill-out woven with organic textures, afro house grooves, and the occasional slow-burning balearic edit. For drifting, not arriving.'},
-  evening:{time:'5PM – Midnight',title:'The Ascent',  body:'The energy builds. Peak-time house and driving techno for the transition from daylight to dark — Ibiza prime time, terrace anthems, Chicago-rooted rhythm with a Berlin edge. Expect names both legendary and rising: the floor starts filling and the tempo climbs with it.'},
-  night:  {time:'Midnight – 9AM',title:'The Descent', body:'After the peak, the interior. Minimal techno, dark ambient, and stripped-back house for the deep hours — instrumental, hypnotic, unresolved. This is music that moves without destination. No vocals, no rush. Only the low end and the space between.'}
+  evening:{time:'12PM – 2AM',title:'The Ascent',  body:'The energy builds. Peak-time house and driving techno for the transition from daylight to dark — Ibiza prime time, terrace anthems, Chicago-rooted rhythm with a Berlin edge. Expect names both legendary and rising: the floor starts filling and the tempo climbs with it.'},
+  night:  {time:'2AM – 7AM',title:'The Descent', body:'After the peak, the interior. Minimal techno, dark ambient, and stripped-back house for the deep hours — instrumental, hypnotic, unresolved. This is music that moves without destination. No vocals, no rush. Only the low end and the space between.'}
 };
 const overlay=document.getElementById('overlay');
 function openPopup(s){const sl=slots[s];document.getElementById('popupTime').textContent=sl.time;document.getElementById('popupTitle').textContent=sl.title;document.getElementById('popupBody').textContent=sl.body;overlay.classList.add('open');document.body.style.overflow='hidden';}
