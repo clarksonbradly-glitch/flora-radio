@@ -442,16 +442,24 @@ function initWidget(track,offsetSecs,autoplay) {
 }
 
 function updateNowPlaying(track,offsetSecs) {
-  document.getElementById('npTitle').textContent=`${track.artist} — ${track.title}`;
-  document.getElementById('npMeta').textContent=`${track.event}  ·  ${track.year}`;
-  document.getElementById('attrSoundcloud').href=track.url;
-  document.getElementById('attrArtist').href=track.artistSC;
-  document.getElementById('attrArtist').textContent=`${track.artist} on SoundCloud ↗`;
-  if(offsetSecs>60){
-    document.getElementById('npProgress').textContent=
-      `${formatTime(offsetSecs)} into ${formatTime(track.duration*60)} — joining live transmission`;
+  if (!track) return;
+  // Force now-playing visible
+  document.getElementById('nowPlaying').classList.add('visible');
+  // Artist and title
+  const titleEl = document.getElementById('npTitle');
+  const metaEl  = document.getElementById('npMeta');
+  titleEl.textContent = track.artist + ' — ' + track.title;
+  metaEl.textContent  = (track.event || '') + '  ·  ' + (track.year || '');
+  // Attribution
+  document.getElementById('attrSoundcloud').href = track.url || '#';
+  document.getElementById('attrArtist').href = track.artistSC || '#';
+  document.getElementById('attrArtist').textContent = track.artist + ' on SoundCloud ↗';
+  // Progress
+  const prog = document.getElementById('npProgress');
+  if (offsetSecs > 60) {
+    prog.textContent = formatTime(offsetSecs) + ' into ' + formatTime(track.duration*60) + ' — joining live transmission';
   } else {
-    document.getElementById('npProgress').textContent='';
+    prog.textContent = '';
   }
   attrEl.classList.add('visible');
 }
