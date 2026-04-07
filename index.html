@@ -13,7 +13,6 @@
 
   .page { height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:13vh 2rem 8vh; text-align:center; }
 
-  /* ── BRAND ── */
   .brand { display:flex; flex-direction:column; align-items:center; gap:0.85rem; animation:rise 1.4s ease both; }
   .logo { display:flex; align-items:center; justify-content:center; font-size:clamp(3rem,10.5vw,5.2rem); font-weight:300; text-transform:uppercase; color:var(--ink); line-height:1; }
   .ll { display:inline-block; margin-right:0.38em; }
@@ -28,35 +27,35 @@
   @keyframes draw { to { stroke-dashoffset:0; } }
   .subline { font-size:clamp(.46rem,1.3vw,.56rem); letter-spacing:.28em; padding-left:.28em; text-transform:uppercase; color:var(--dust); font-weight:400; }
 
-  /* ── PLAYER ── */
   .player { display:flex; flex-direction:column; align-items:center; animation:rise 1.4s ease .2s both; }
   .eq { display:flex; align-items:flex-end; justify-content:center; gap:3px; height:22px; margin-bottom:1.4rem; opacity:0; transition:opacity .7s ease; }
   .eq.active { opacity:1; }
   .eq-bar { width:2px; background:var(--ink); border-radius:2px 2px 0 0; height:3px; transition:height .09s ease; }
+
   .play-btn { width:68px; height:68px; border-radius:50%; border:1px solid var(--ink); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; position:relative; transition:border-color .3s,transform .3s; outline:none; -webkit-tap-highlight-color:transparent; }
-  .play-btn::before { content:''; position:absolute; width:82px; height:82px; border-radius:50%; border:1px solid rgba(17,16,16,.11); }
+  .play-btn::before { content:''; position:absolute; width:82px; height:82px; border-radius:50%; border:1px solid rgba(17,16,16,.2); }
   .play-btn:hover { border-color:var(--accent); transform:scale(1.04); }
   .play-btn.playing { border-color:var(--accent); }
   .play-btn.playing::before { animation:breathe 2.6s ease-in-out infinite; border-color:rgba(200,80,58,.22); }
   @keyframes breathe { 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.14);opacity:.2;} }
+
   .icon-play { width:0; height:0; border-top:9px solid transparent; border-bottom:9px solid transparent; border-left:15px solid var(--ink); margin-left:4px; }
   .icon-pause { display:none; gap:5px; align-items:center; }
   .icon-pause span { display:block; width:3px; height:14px; background:var(--accent); border-radius:1px; }
   .play-btn.playing .icon-play { display:none; }
   .play-btn.playing .icon-pause { display:flex; }
 
-  /* Now playing */
   .now-playing { margin-top:1.4rem; opacity:0; transform:translateY(4px); transition:opacity .5s ease .1s,transform .5s ease .1s; min-height:3.5rem; }
   .now-playing.visible { opacity:1; transform:translateY(0); }
   .np-label { font-size:.48rem; letter-spacing:.24em; text-transform:uppercase; color:var(--dust); margin-bottom:.28rem; }
   .np-title { font-size:clamp(.82rem,2.2vw,.96rem); font-weight:400; letter-spacing:.04em; color:var(--ink); font-style:italic; }
   .np-meta { font-size:.46rem; letter-spacing:.18em; text-transform:uppercase; color:var(--dust); margin-top:.25rem; }
   .np-progress { margin-top:.5rem; font-size:.4rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); opacity:.7; }
+
   .ident-dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin-left:.5rem; vertical-align:middle; opacity:0; transition:opacity .3s; }
   .ident-dot.speaking { opacity:1; animation:blink .6s ease-in-out infinite; }
   @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.2;} }
 
-  /* Attribution */
   .attribution { margin-top:1rem; opacity:0; transform:translateY(4px); transition:opacity .5s ease .2s,transform .5s ease .2s; }
   .attribution.visible { opacity:1; transform:translateY(0); }
   .attr-link { font-size:.44rem; letter-spacing:.16em; text-transform:uppercase; color:var(--dust); text-decoration:none; border-bottom:1px solid rgba(17,16,16,.2); padding-bottom:1px; transition:color .2s,border-color .2s; }
@@ -64,40 +63,22 @@
   .attr-divider { margin:0 .6rem; color:var(--dust); opacity:.4; font-size:.44rem; }
   .attr-disclaimer { display:block; margin-top:.4rem; font-size:.38rem; letter-spacing:.12em; text-transform:uppercase; color:var(--dust); opacity:.6; font-style:italic; }
 
-  /* Loading */
   .loading-text { font-size:.48rem; letter-spacing:.2em; text-transform:uppercase; color:var(--dust); font-style:normal; animation:pulse 1.5s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:.4;} 50%{opacity:1;} }
 
-  /* 
-    iOS SAFARI FIX
-    On desktop: iframe is hidden off-screen (invisible)
-    On iOS: iframe sits at the bottom of the page, 1px tall, 
-    fully visible to the DOM so Safari allows audio playback
-  */
+  /* SC iframe — visible 1px strip at bottom on ALL devices for Safari compatibility */
   #sc-frame {
     position: fixed;
-    left: -9999px;
-    top: -9999px;
-    width: 1px;
+    bottom: 0;
+    left: 0;
+    width: 100%;
     height: 1px;
     border: none;
     opacity: 0;
+    pointer-events: none;
+    z-index: 1;
   }
 
-  @media (max-width: 768px) {
-    #sc-frame {
-      position: fixed;
-      left: 0;
-      bottom: 0;
-      width: 100%;
-      height: 1px;
-      top: auto;
-      opacity: 0;
-      pointer-events: none;
-    }
-  }
-
-  /* ── SCHEDULE ── */
   .schedule { display:flex; flex-direction:row; align-items:center; justify-content:center; width:100%; max-width:480px; animation:rise 1.4s ease .4s both; }
   .sched-item { display:flex; flex-direction:column; align-items:center; gap:.25rem; flex:1; cursor:pointer; padding:.5rem .4rem; transition:opacity .2s; -webkit-tap-highlight-color:transparent; }
   .sched-item:hover { opacity:.6; }
@@ -109,7 +90,6 @@
   .sched-item.now-slot .sched-genre { color:var(--accent); }
   .sched-item.now-slot .sched-hint { width:20px; background:var(--accent); }
 
-  /* ── POPUP ── */
   .overlay { position:fixed; inset:0; z-index:200; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; padding:0 1rem 2rem; }
   .overlay.open { pointer-events:all; }
   .overlay-backdrop { position:fixed; inset:0; background:rgba(245,242,236,0); transition:background .35s ease; z-index:-1; }
@@ -193,16 +173,8 @@
   </div>
 </div>
 
-<!-- 
-  iOS Safari requires the iframe to be present in the visible DOM.
-  It sits at 1px tall at the bottom, invisible but accessible to Safari's audio engine.
--->
-<iframe
-  id="sc-frame"
-  allow="autoplay"
-  scrolling="no"
-  frameborder="no"
-></iframe>
+<!-- Sits in visible DOM at 1px — required for iOS Safari audio unlock -->
+<iframe id="sc-frame" allow="autoplay" scrolling="no" frameborder="no"></iframe>
 
 <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
   <div class="overlay-backdrop"></div>
@@ -218,7 +190,7 @@
 <script src="https://w.soundcloud.com/player/api.js"></script>
 <script>
 // ─────────────────────────────────────────────
-// iOS SAFARI DETECTION
+// iOS DETECTION
 // ─────────────────────────────────────────────
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
@@ -243,16 +215,16 @@ function highlightSlot() {
 // SEEDED DAILY SHUFFLE
 // ─────────────────────────────────────────────
 function seededRandom(seed) {
-  let s = seed;
-  return () => { s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; };
+  let s=seed;
+  return ()=>{s=(s*1664525+1013904223)&0xffffffff;return (s>>>0)/0xffffffff;};
 }
 function getDailySeed() {
-  const d = new Date();
+  const d=new Date();
   return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
 }
-function shuffleWithSeed(arr, seed) {
-  const rng=seededRandom(seed), a=[...arr];
-  for (let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+function shuffleWithSeed(arr,seed) {
+  const rng=seededRandom(seed),a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
   return a;
 }
 
@@ -260,39 +232,37 @@ function shuffleWithSeed(arr, seed) {
 // 24/7 SYNC ENGINE
 // ─────────────────────────────────────────────
 function getSyncPosition(tracks) {
-  const now      = new Date();
-  const midnight = new Date(now); midnight.setHours(0,0,0,0);
-  const secondsToday = Math.floor((now - midnight) / 1000);
-  const totalDuration = tracks.reduce((sum,t) => sum + (t.duration*60), 0);
-  if (totalDuration === 0) return { index:0, offsetSeconds:0 };
-  const positionInCycle = secondsToday % totalDuration;
-  let elapsed = 0;
-  for (let i=0; i<tracks.length; i++) {
-    const dur = tracks[i].duration * 60;
-    if (positionInCycle < elapsed + dur) {
-      return { index:i, offsetSeconds: Math.floor(positionInCycle - elapsed) };
-    }
-    elapsed += dur;
+  const now=new Date(), midnight=new Date(now);
+  midnight.setHours(0,0,0,0);
+  const secondsToday=Math.floor((now-midnight)/1000);
+  const totalDuration=tracks.reduce((sum,t)=>sum+(t.duration*60),0);
+  if(totalDuration===0) return {index:0,offsetSeconds:0};
+  const pos=secondsToday%totalDuration;
+  let elapsed=0;
+  for(let i=0;i<tracks.length;i++){
+    const dur=tracks[i].duration*60;
+    if(pos<elapsed+dur) return {index:i,offsetSeconds:Math.floor(pos-elapsed)};
+    elapsed+=dur;
   }
-  return { index:0, offsetSeconds:0 };
+  return {index:0,offsetSeconds:0};
 }
 
 function formatTime(s) {
-  const m=Math.floor(s/60), sec=Math.floor(s%60);
+  const m=Math.floor(s/60),sec=Math.floor(s%60);
   return `${m}:${sec.toString().padStart(2,'0')}`;
 }
 
 // ─────────────────────────────────────────────
 // FETCH LIBRARY
 // ─────────────────────────────────────────────
-let tracks=[], currentIndex=0, startOffset=0, libraryLoaded=false;
+let tracks=[],currentIndex=0,startOffset=0,libraryLoaded=false;
 
 async function fetchLibrary() {
   try {
-    const res  = await fetch(`/api/library?bucket=${encodeURIComponent(getCurrentBucket())}`);
-    const data = await res.json();
-    if (!data.records||!data.records.length) return false;
-    const raw = data.records.map(r=>({
+    const res=await fetch(`/api/library?bucket=${encodeURIComponent(getCurrentBucket())}`);
+    const data=await res.json();
+    if(!data.records||!data.records.length) return false;
+    const raw=data.records.map(r=>({
       url:      r.fields.SoundCloud_URL    ||'',
       title:    r.fields.Title             ||'Unknown Mix',
       artist:   r.fields.Artist            ||'Unknown Artist',
@@ -301,143 +271,153 @@ async function fetchLibrary() {
       artistSC: r.fields.Artist_SoundCloud ||'#',
       duration: parseFloat(r.fields.Duration)||60,
     })).filter(t=>t.url);
-    tracks       = shuffleWithSeed(raw, getDailySeed());
-    const sync   = getSyncPosition(tracks);
-    currentIndex = sync.index;
-    startOffset  = sync.offsetSeconds;
-    libraryLoaded = true;
+    tracks=shuffleWithSeed(raw,getDailySeed());
+    const sync=getSyncPosition(tracks);
+    currentIndex=sync.index;
+    startOffset=sync.offsetSeconds;
+    libraryLoaded=true;
     return true;
-  } catch(e) { console.error(e); return false; }
+  } catch(e){console.error(e);return false;}
 }
 
 // ─────────────────────────────────────────────
 // VOICE IDENT
 // ─────────────────────────────────────────────
-const IDENT_MS=20*60*1000; let identTimer=null, isSpeaking=false;
+const IDENT_MS=20*60*1000;
+let identTimer=null,isSpeaking=false;
 const dot=document.getElementById('identDot');
 
 function applyVoice(u) {
-  u.rate=0.78; u.pitch=0.6; u.volume=1;
+  u.rate=0.78;u.pitch=0.6;u.volume=1;
   const v=window.speechSynthesis.getVoices();
   const p=v.find(x=>x.name.toLowerCase().includes('google uk english male')||x.name.toLowerCase().includes('daniel')||x.name.toLowerCase().includes('english'));
-  if(p) u.voice=p;
+  if(p)u.voice=p;
 }
-
-function setVol(v) { if(widget) widget.setVolume(v); }
-function ramp(from,to,ms,done) {
-  const steps=20,st=ms/steps,ss=(to-from)/steps; let cur=from,cnt=0;
+function setVol(v){if(widget)widget.setVolume(v);}
+function ramp(from,to,ms,done){
+  const steps=20,st=ms/steps,ss=(to-from)/steps;let cur=from,cnt=0;
   const iv=setInterval(()=>{cur+=ss;cnt++;setVol(Math.round(Math.max(0,Math.min(100,cur))));if(cnt>=steps){clearInterval(iv);if(done)done();}},st);
 }
-
-function speak(text,onDone) {
+function speak(text,onDone){
   if(!window.speechSynthesis||isSpeaking){if(onDone)onDone();return;}
-  isSpeaking=true; dot.classList.add('speaking');
+  isSpeaking=true;dot.classList.add('speaking');
   ramp(100,18,700,()=>{
-    const u=new SpeechSynthesisUtterance(text); applyVoice(u);
+    const u=new SpeechSynthesisUtterance(text);applyVoice(u);
     u.onend=()=>ramp(18,100,900,()=>{isSpeaking=false;dot.classList.remove('speaking');if(onDone)onDone();});
     u.onerror=()=>{setVol(100);isSpeaking=false;dot.classList.remove('speaking');if(onDone)onDone();};
     window.speechSynthesis.speak(u);
   });
 }
-
 function artistCallout(){if(!playing||!tracks.length)return;const t=tracks[currentIndex];speak(`${t.artist}. ${t.event}. ${t.year}.`);}
 function stationIdent(cb){speak('You are listening to Flora.',cb);}
 function scheduleCallouts(){clearInterval(identTimer);identTimer=setInterval(()=>{if(playing)artistCallout();},IDENT_MS);}
 
 // ─────────────────────────────────────────────
 // SOUNDCLOUD WIDGET
+// iOS FIX: load iframe with auto_play=true first,
+// let audio unlock, THEN seek to offset position
+// after a safe delay
 // ─────────────────────────────────────────────
-let widget=null, playing=false, eqTimer=null;
-const btn=document.getElementById('playBtn'),eq=document.getElementById('eq'),
-      np=document.getElementById('nowPlaying'),bars=document.querySelectorAll('.eq-bar'),
-      attrEl=document.getElementById('attribution');
-
-function buildSCUrl(trackUrl) {
-  // On iOS, include auto_play=true in the iframe src itself
-  // This is required for Safari to honour the user gesture chain
-  const autoplay = isIOS ? 'true' : 'false';
-  return `https://w.soundcloud.com/player/?url=${encodeURIComponent(trackUrl)}&auto_play=${autoplay}&buying=false&liking=false&download=false&sharing=false&show_artwork=false&show_comments=false&show_playcount=false&show_user=false&hide_related=true&visual=false&color=%23c8503a`;
-}
+let widget=null,playing=false,eqTimer=null;
+const btn=document.getElementById('playBtn');
+const eq=document.getElementById('eq');
+const np=document.getElementById('nowPlaying');
+const bars=document.querySelectorAll('.eq-bar');
+const attrEl=document.getElementById('attribution');
 
 function initWidget(track, offsetSecs, autoplay) {
-  const frame = document.getElementById('sc-frame');
-  frame.src = buildSCUrl(track.url);
-  widget = SC.Widget(frame);
+  const frame=document.getElementById('sc-frame');
 
-  widget.bind(SC.Widget.Events.READY, () => {
-    updateNowPlaying(track, offsetSecs);
-    if (offsetSecs > 0) {
-      widget.seekTo(offsetSecs * 1000);
+  // On iOS: always set auto_play=true in URL to chain from user gesture
+  // On desktop: respect the autoplay param
+  const shouldAutoplay = isIOS ? true : autoplay;
+
+  frame.src=`https://w.soundcloud.com/player/?url=${encodeURIComponent(track.url)}&auto_play=${shouldAutoplay}&buying=false&liking=false&download=false&sharing=false&show_artwork=false&show_comments=false&show_playcount=false&show_user=false&hide_related=true&visual=false&color=%23c8503a`;
+
+  widget=SC.Widget(frame);
+
+  widget.bind(SC.Widget.Events.READY,()=>{
+    updateNowPlaying(track,offsetSecs);
+
+    if(isIOS && offsetSecs > 5) {
+      // iOS strategy:
+      // 1. Let audio start playing from beginning (auto_play=true already set)
+      // 2. Wait 1.5s for Safari to fully unlock audio context
+      // 3. Then seek to correct position — seek works after audio is unlocked
+      setTimeout(()=>{
+        widget.seekTo(offsetSecs * 1000);
+      }, 1500);
+    } else {
+      // Desktop: seek immediately then play
+      if(offsetSecs > 0) widget.seekTo(offsetSecs * 1000);
+      if(autoplay) widget.play();
     }
-    if (autoplay) widget.play();
   });
 
-  widget.bind(SC.Widget.Events.FINISH, () => {
+  widget.bind(SC.Widget.Events.FINISH,()=>{
     currentIndex=(currentIndex+1)%tracks.length;
     stationIdent(()=>initWidget(tracks[currentIndex],0,true));
   });
 
-  widget.bind(SC.Widget.Events.ERROR, () => {
+  widget.bind(SC.Widget.Events.ERROR,()=>{
     currentIndex=(currentIndex+1)%tracks.length;
     initWidget(tracks[currentIndex],0,true);
   });
 }
 
-function updateNowPlaying(track, offsetSecs) {
-  document.getElementById('npTitle').textContent    = `${track.artist} — ${track.title}`;
-  document.getElementById('npMeta').textContent     = `${track.event}  ·  ${track.year}`;
-  document.getElementById('attrSoundcloud').href    = track.url;
-  document.getElementById('attrArtist').href        = track.artistSC;
-  document.getElementById('attrArtist').textContent = `${track.artist} on SoundCloud ↗`;
-  if (offsetSecs > 60) {
-    document.getElementById('npProgress').textContent =
+function updateNowPlaying(track,offsetSecs){
+  document.getElementById('npTitle').textContent=`${track.artist} — ${track.title}`;
+  document.getElementById('npMeta').textContent=`${track.event}  ·  ${track.year}`;
+  document.getElementById('attrSoundcloud').href=track.url;
+  document.getElementById('attrArtist').href=track.artistSC;
+  document.getElementById('attrArtist').textContent=`${track.artist} on SoundCloud ↗`;
+  if(offsetSecs>60){
+    document.getElementById('npProgress').textContent=
       `${formatTime(offsetSecs)} into ${formatTime(track.duration*60)} — joining live transmission`;
   } else {
-    document.getElementById('npProgress').textContent = '';
+    document.getElementById('npProgress').textContent='';
   }
   attrEl.classList.add('visible');
 }
 
-async function togglePlay() {
-  if (!playing && !libraryLoaded) {
-    btn.classList.add('playing'); eq.classList.add('active'); np.classList.add('visible');
+async function togglePlay(){
+  if(!playing&&!libraryLoaded){
+    btn.classList.add('playing');eq.classList.add('active');np.classList.add('visible');
     document.getElementById('npTitle').innerHTML='<span class="loading-text">Syncing transmission</span>';
     playing=true;
     window.speechSynthesis.getVoices();
-
-    const ok = await fetchLibrary();
-    if (!ok||!tracks.length) {
+    const ok=await fetchLibrary();
+    if(!ok||!tracks.length){
       document.getElementById('npTitle').textContent='No mixes found — add some in Airtable';
-      playing=false; btn.classList.remove('playing'); eq.classList.remove('active'); return;
+      playing=false;btn.classList.remove('playing');eq.classList.remove('active');return;
     }
-
-    initWidget(tracks[currentIndex], startOffset, true);
-    runEQ(); scheduleCallouts();
+    initWidget(tracks[currentIndex],startOffset,true);
+    runEQ();scheduleCallouts();
     return;
   }
 
   playing=!playing;
-  if (playing) {
-    if (tracks.length) {
+  if(playing){
+    if(tracks.length){
       const sync=getSyncPosition(tracks);
-      if (Math.abs(sync.index-currentIndex)>0||Math.abs(sync.offsetSeconds-startOffset)>30) {
+      if(Math.abs(sync.index-currentIndex)>0||Math.abs(sync.offsetSeconds-startOffset)>30){
         currentIndex=sync.index;
         initWidget(tracks[currentIndex],sync.offsetSeconds,true);
       } else {
         widget.play();
       }
     }
-    btn.classList.add('playing'); eq.classList.add('active'); runEQ(); scheduleCallouts();
+    btn.classList.add('playing');eq.classList.add('active');runEQ();scheduleCallouts();
   } else {
     widget.pause();
-    btn.classList.remove('playing'); eq.classList.remove('active');
-    clearTimeout(eqTimer); clearInterval(identTimer);
+    btn.classList.remove('playing');eq.classList.remove('active');
+    clearTimeout(eqTimer);clearInterval(identTimer);
     bars.forEach(b=>b.style.height='3px');
-    window.speechSynthesis.cancel(); isSpeaking=false; dot.classList.remove('speaking'); setVol(100);
+    window.speechSynthesis.cancel();isSpeaking=false;dot.classList.remove('speaking');setVol(100);
   }
 }
 
-function runEQ() {
+function runEQ(){
   if(!playing)return;
   bars.forEach(b=>{b.style.height=(Math.random()<.12?2+Math.random()*3:4+Math.random()*18)+'px';});
   eqTimer=setTimeout(runEQ,100+Math.random()*90);
