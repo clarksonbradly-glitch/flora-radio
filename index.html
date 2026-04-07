@@ -351,6 +351,8 @@ function formatTime(s) {
 let tracks=[],currentIndex=0,startOffset=0,libraryLoaded=false;
 
 async function fetchLibrary() {
+  // Return immediately if already loaded - critical for iOS tap gesture timing
+  if (libraryLoaded && tracks.length) return true;
   try {
     const res=await fetch(`/api/library?bucket=${encodeURIComponent(getCurrentBucket())}`);
     const data=await res.json();
@@ -454,49 +456,22 @@ function updateNowPlaying(track,offsetSecs) {
   attrEl.classList.add('visible');
 }
 
-// Pre-fetch library on page load so it is ready before user taps
-let libraryPromise = null;
-function prefetchLibrary() {
-  if (!libraryPromise) libraryPromise = fetchLibrary();
-  return libraryPromise;
-}
-
-// Warm up the iframe immediately to unlock iOS audio context
-function warmIOSAudio() {
-  const frame = document.getElementById('sc-frame');
-  frame.src = 'https://w.soundcloud.com/player/?url=https%3A%2F%2Fsoundcloud.com%2Fibizaglobalradio%2Fozalid-tech-tunes-radio-ibiza&auto_play=true&buying=false&liking=false&download=false&sharing=false&show_artwork=false&show_comments=false&show_playcount=false&show_user=false&hide_related=true&visual=false';
-}
-
 async function togglePlay() {
   if (!playing && !libraryLoaded) {
     btn.classList.add('playing'); eq.classList.add('active'); np.classList.add('visible');
     document.getElementById('npTitle').innerHTML = '<span class="loading-text">Syncing transmission</span>';
     playing = true;
     window.speechSynthesis.getVoices();
-
-    if (isIOS) {
-      // Step 1: Unlock audio immediately on tap gesture (synchronous)
-      warmIOSAudio();
-      // Step 2: Fetch library (audio already unlocked)
-      const ok = await prefetchLibrary();
-      if (!ok || !tracks.length) {
-        document.getElementById('npTitle').textContent = 'No mixes found — add some in Airtable';
-        playing = false; btn.classList.remove('playing'); eq.classList.remove('active'); return;
-      }
-      // Step 3: Load real track — iOS audio context already open
-      initWidget(tracks[currentIndex], startOffset, true);
-    } else {
-      const ok = await prefetchLibrary();
-      if (!ok || !tracks.length) {
-        document.getElementById('npTitle').textContent = 'No mixes found — add some in Airtable';
-        playing = false; btn.classList.remove('playing'); eq.classList.remove('active'); return;
-      }
-      initWidget(tracks[currentIndex], startOffset, true);
+    // If prefetch already ran in background, this resolves instantly
+    const ok = await fetchLibrary();
+    if (!ok || !tracks.length) {
+      document.getElementById('npTitle').textContent = 'No mixes found — add some in Airtable';
+      playing = false; btn.classList.remove('playing'); eq.classList.remove('active'); return;
     }
+    initWidget(tracks[currentIndex], startOffset, true);
     runEQ(); scheduleCallouts();
     return;
   }
-
   playing = !playing;
   if (playing) {
     if (tracks.length) {
@@ -538,9 +513,10 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closePopup();});
 window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
 highlightSlot();
 
-// Pre-fetch library silently on page load
-// So it's ready the moment user taps play
-prefetchLibrary();
+// Silently pre-fetch the library on page load
+// so Airtable data is ready before the user taps play
+// This reduces the async gap on iOS significantly
+fetchLibrary().catch(()=>{});
 </script>
 </body>
 </html>
