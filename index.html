@@ -128,6 +128,8 @@
   .np-title { font-size:clamp(1.2rem,3.5vw,1.5rem); font-weight:400; letter-spacing:.04em; color:var(--ink); font-style:italic; transition:color 1.2s ease; }
   .np-meta { font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink); margin-top:.25rem; opacity:0.8; transition:color 1.2s ease; }
   .np-progress { margin-top:.5rem; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); opacity:.9; transition:color 1.2s ease; }
+  .np-next { margin-top:.6rem; font-size:.52rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); opacity:0.45; transition:color 1.2s ease; }
+  .np-next span { opacity:0.6; margin-right:.4rem; }
 
   .ident-dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin-left:.5rem; vertical-align:middle; opacity:0; transition:opacity .3s, background 1.2s ease; }
   .ident-dot.speaking { opacity:1; animation:blink .6s ease-in-out infinite; }
@@ -214,6 +216,7 @@
       <div class="np-title" id="npTitle">—</div>
       <div class="np-meta" id="npMeta"></div>
       <div class="np-progress" id="npProgress"></div>
+      <div class="np-next" id="npNext"></div>
     </div>
     <div class="attribution" id="attribution">
       <a class="attr-link" id="attrSoundcloud" href="#" target="_blank" rel="noopener">Streamed via SoundCloud</a>
@@ -460,6 +463,19 @@ function updateNowPlaying(track,offsetSecs) {
     prog.textContent = '';
   }
   attrEl.classList.add('visible');
+  updateUpNext();
+}
+
+function updateUpNext() {
+  const nextEl = document.getElementById('npNext');
+  if (!nextEl || !tracks.length) return;
+  const nextIndex = (currentIndex + 1) % tracks.length;
+  const next = tracks[nextIndex];
+  if (next) {
+    nextEl.innerHTML = '<span>Up next</span>' + next.artist + ' — ' + next.title;
+  } else {
+    nextEl.textContent = '';
+  }
 }
 
 async function togglePlay() {
