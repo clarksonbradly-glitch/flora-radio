@@ -103,9 +103,6 @@
 
   .subline { font-size:clamp(.7rem,1.8vw,.82rem); letter-spacing:.28em; padding-left:.28em; text-transform:uppercase; color:var(--ink); font-weight:400; opacity:0.7; transition:color 1.2s ease; }
 
-  /* ── SLOT ICON ── */
-  .slot-icon { font-size:1.4rem; margin-bottom:0.4rem; opacity:0.6; animation:rise 1.4s ease .1s both; }
-
   /* ── PLAYER ── */
   .player { display:flex; flex-direction:column; align-items:center; animation:rise 1.4s ease .2s both; }
   .eq { display:flex; align-items:flex-end; justify-content:center; gap:3px; height:22px; margin-bottom:1.4rem; opacity:0; transition:opacity .7s ease; }
@@ -153,7 +150,6 @@
   .sched-item { display:flex; flex-direction:column; align-items:center; gap:.2rem; flex:1; cursor:pointer; padding:.6rem .4rem; transition:opacity .2s; -webkit-tap-highlight-color:transparent; }
   .sched-item:hover { opacity:.7; }
   .sched-item+.sched-item { border-left:1px solid var(--border); }
-  .sched-icon { font-size:1rem; opacity:0.6; margin-bottom:.1rem; }
   .sched-time { font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); white-space:nowrap; opacity:0.7; transition:color 1.2s ease; }
   .sched-genre { font-size:.88rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); font-weight:400; white-space:nowrap; transition:color 1.2s ease; }
   .sched-hint { width:12px; height:1px; background:var(--border); margin-top:.25rem; transition:width .3s ease, background .3s; }
@@ -183,7 +179,6 @@
 
 <div class="page">
   <div class="brand">
-    <div class="slot-icon" id="slotIcon">✦</div>
     <div class="logo">
       <span class="ll">F</span><span class="ll">L</span>
       <span class="logo-o">
@@ -230,19 +225,16 @@
 
   <div class="schedule">
     <div class="sched-item" id="slot-day" onclick="openPopup('day')">
-      <div class="sched-icon">☀️</div>
       <div class="sched-time">7AM – 12PM</div>
       <div class="sched-genre">Morning Drift</div>
       <div class="sched-hint"></div>
     </div>
     <div class="sched-item" id="slot-evening" onclick="openPopup('evening')">
-      <div class="sched-icon">↗</div>
       <div class="sched-time">12PM – 2AM</div>
       <div class="sched-genre">The Ascent</div>
       <div class="sched-hint"></div>
     </div>
     <div class="sched-item" id="slot-night" onclick="openPopup('night')">
-      <div class="sched-icon">🌙</div>
       <div class="sched-time">2AM – 7AM</div>
       <div class="sched-genre">The Descent</div>
       <div class="sched-hint"></div>
@@ -283,7 +275,6 @@ const themes = {
 function applyTheme(bucket) {
   const t = themes[bucket] || themes['Morning'];
   document.body.className = t.cls;
-  document.getElementById('slotIcon').textContent = t.icon;
 }
 
 // ─────────────────────────────────────────────
