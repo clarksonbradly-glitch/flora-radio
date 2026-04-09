@@ -224,6 +224,21 @@
   .about-footer a { color: var(--ink); opacity: 0.6; text-decoration: none; border-bottom: 1px solid var(--border); }
   .about-footer a:hover { opacity: 1; }
 
+  /* ── TWO-STAGE PLAY BUTTON ── */
+  /* Tuning state: button pulses softly, ready hint appears */
+  .play-btn.tuning { border-color: var(--accent); }
+  .play-btn.tuning::before { animation: breathe 1.4s ease-in-out infinite; border-color: var(--accent); opacity: 0.3; }
+  .play-btn.tuning .icon-play { border-left-color: var(--accent); opacity: 0.4; }
+
+  .ready-hint {
+    margin-top: .9rem;
+    font-size: .52rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--accent); opacity: 0;
+    transition: opacity .4s ease;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  .ready-hint.visible { opacity: 1; }
+
   @keyframes rise { from{opacity:0;transform:translateY(9px);} to{opacity:1;transform:translateY(0);} }
 </style>
 </head>
@@ -264,6 +279,7 @@
       <div class="icon-play"></div>
       <div class="icon-pause"><span></span><span></span></div>
     </button>
+    <div class="ready-hint" id="readyHint">Tap to listen</div>
     <div class="now-playing" id="nowPlaying">
       <div class="np-label">Now playing <span class="ident-dot" id="identDot"></span></div>
       <div class="np-title" id="npTitle">—</div>
@@ -471,6 +487,7 @@ const np   = document.getElementById('nowPlaying');
 const bars = document.querySelectorAll('.eq-bar');
 
 function initWidget(track, offsetSecs, autoplay) {
+  widgetReady = false;
   const frame = document.getElementById('sc-frame');
   frame.src = 'https://w.soundcloud.com/player/?url='+encodeURIComponent(track.url)+
     '&auto_play=false&buying=false&liking=false&download=false&sharing=false'+
@@ -478,15 +495,25 @@ function initWidget(track, offsetSecs, autoplay) {
     '&show_user=false&hide_related=true&visual=false&color=%23c8503a';
   widget = SC.Widget(frame);
   widget.bind(SC.Widget.Events.READY, function() {
-    updateNowPlaying(track, offsetSecs);
     if (offsetSecs > 0) widget.seekTo(offsetSecs * 1000);
-    if (autoplay) widget.play();
+    updateNowPlaying(track, offsetSecs);
+    widgetReady = true;
+
+    if (autoplay) {
+      // Auto-play for track transitions (mid-session, audio already unlocked)
+      widget.play();
+    } else {
+      // Stage 1 complete — show "Tap to listen" prompt
+      document.getElementById('readyHint').classList.add('visible');
+    }
   });
   widget.bind(SC.Widget.Events.FINISH, function() {
+    widgetReady = false;
     currentIndex = (currentIndex+1)%tracks.length;
     stationIdent(function(){initWidget(tracks[currentIndex],0,true);});
   });
   widget.bind(SC.Widget.Events.ERROR, function() {
+    widgetReady = false;
     currentIndex = (currentIndex+1)%tracks.length;
     initWidget(tracks[currentIndex],0,true);
   });
@@ -499,32 +526,72 @@ function updateNowPlaying(track, offsetSecs) {
   document.getElementById('npMeta').textContent  = (track.event||'')+' · '+(track.year||'');
 }
 
+// ─────────────────────────────────────────────
+// TWO-STAGE PLAY
+// Stage 1 (first tap): fetch library, load widget — show "Tap to listen"
+// Stage 2 (second tap): widget.play() fires clean from user gesture
+// ─────────────────────────────────────────────
+let widgetReady = false; // true once SC widget has fired READY
+
 async function togglePlay() {
-  if (!libraryLoaded) {
-    btn.classList.add('playing'); eq.classList.add('active'); np.classList.add('visible');
-    document.getElementById('npTitle').innerHTML = '<span class="loading-text">Syncing transmission</span>';
-    playing = true;
+
+  // ── STAGE 1: First tap — prepare everything ──
+  if (!libraryLoaded && !widgetReady) {
+    btn.classList.add('tuning');
     window.speechSynthesis.getVoices();
+
+    // Fetch library async (gesture has now expired — that's fine, we don't play yet)
     const ok = await fetchLibrary();
-    if (!ok||!tracks.length) {
+    if (!ok || !tracks.length) {
       document.getElementById('npTitle').textContent = 'No mixes found — add some in Airtable';
-      playing=false; btn.classList.remove('playing'); eq.classList.remove('active'); return;
+      np.classList.add('visible');
+      btn.classList.remove('tuning');
+      return;
     }
-    initWidget(tracks[currentIndex], startOffset, true);
-    runEQ(); scheduleCallouts();
+
+    // Load the widget silently — no autoplay
+    initWidget(tracks[currentIndex], startOffset, false);
+    // readyHint appears once widget fires READY (handled in initWidget callback)
     return;
   }
+
+  // ── STAGE 2: Widget ready, user taps again — PLAY ──
+  if (widgetReady && !playing) {
+    playing = true;
+    widget.play(); // clean synchronous call — browser honours it
+    btn.classList.remove('tuning');
+    btn.classList.add('playing');
+    eq.classList.add('active');
+    document.getElementById('readyHint').classList.remove('visible');
+    np.classList.add('visible');
+    runEQ();
+    scheduleCallouts();
+    return;
+  }
+
+  // ── PAUSE ──
   if (playing) {
-    playing=false; if(widget)widget.pause();
-    btn.classList.remove('playing'); eq.classList.remove('active');
-    clearTimeout(eqTimer); clearInterval(identTimer);
-    bars.forEach(b=>b.style.height='3px');
-    window.speechSynthesis.cancel(); isSpeaking=false; dot.classList.remove('speaking'); setVol(100);
+    playing = false;
+    if (widget) widget.pause();
+    btn.classList.remove('playing');
+    eq.classList.remove('active');
+    clearTimeout(eqTimer);
+    clearInterval(identTimer);
+    bars.forEach(b => b.style.height = '3px');
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+    dot.classList.remove('speaking');
+    setVol(100);
     return;
   }
-  playing=true; if(widget)widget.play();
-  btn.classList.add('playing'); eq.classList.add('active');
-  runEQ(); scheduleCallouts();
+
+  // ── RESUME after pause ──
+  playing = true;
+  if (widget) widget.play();
+  btn.classList.add('playing');
+  eq.classList.add('active');
+  runEQ();
+  scheduleCallouts();
 }
 
 function runEQ(){
