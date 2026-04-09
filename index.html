@@ -96,6 +96,8 @@
   .np-label { font-size:.58rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ink); margin-bottom:.3rem; opacity:0.5; }
   .np-title { font-size:clamp(1rem,3vw,1.3rem); font-weight:400; letter-spacing:.03em; color:var(--ink); font-style:italic; transition:color 1.2s ease; }
   .np-meta { font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); margin-top:.2rem; opacity:0.6; }
+  .np-sc-link { display:block; margin-top:.5rem; font-size:.52rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); opacity:0.55; text-decoration:none; border-bottom:1px solid var(--border); padding-bottom:1px; transition:opacity .2s; width:fit-content; margin-left:auto; margin-right:auto; }
+  .np-sc-link:hover { opacity:0.9; color:var(--accent); }
   .ident-dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin-left:.5rem; vertical-align:middle; opacity:0; transition:opacity .3s; }
   .ident-dot.speaking { opacity:1; animation:blink .6s ease-in-out infinite; }
   @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.2;} }
@@ -279,11 +281,12 @@
       <div class="icon-play"></div>
       <div class="icon-pause"><span></span><span></span></div>
     </button>
-    <div class="ready-hint" id="readyHint">Tap to listen</div>
+    <div class="ready-hint" id="readyHint"></div>
     <div class="now-playing" id="nowPlaying">
       <div class="np-label">Now playing <span class="ident-dot" id="identDot"></span></div>
       <div class="np-title" id="npTitle">—</div>
       <div class="np-meta" id="npMeta"></div>
+      <a class="np-sc-link" id="npScLink" href="#" target="_blank" rel="noopener"></a>
     </div>
   </div>
 
@@ -503,8 +506,10 @@ function initWidget(track, offsetSecs, autoplay) {
       // Auto-play for track transitions (mid-session, audio already unlocked)
       widget.play();
     } else {
-      // Stage 1 complete — show "Tap to listen" prompt
-      document.getElementById('readyHint').classList.add('visible');
+      // Stage 1 complete — update hint to "Tap to listen"
+      var hint = document.getElementById('readyHint');
+      hint.textContent = 'Tap to listen';
+      hint.classList.add('visible');
     }
   });
   widget.bind(SC.Widget.Events.FINISH, function() {
@@ -524,6 +529,17 @@ function updateNowPlaying(track, offsetSecs) {
   document.getElementById('nowPlaying').classList.add('visible');
   document.getElementById('npTitle').textContent = track.artist+' — '+track.title;
   document.getElementById('npMeta').textContent  = (track.event||'')+' · '+(track.year||'');
+  var scLink = document.getElementById('npScLink');
+  if (scLink) {
+    if (track.artistSC && track.artistSC !== '#' && track.artistSC !== '') {
+      scLink.href = track.artistSC;
+      scLink.textContent = track.artist + ' on SoundCloud ↗';
+      scLink.style.visibility = 'visible';
+    } else {
+      scLink.textContent = '';
+      scLink.style.visibility = 'hidden';
+    }
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -539,6 +555,10 @@ async function togglePlay() {
   if (!libraryLoaded && !widgetReady) {
     btn.classList.add('tuning');
     window.speechSynthesis.getVoices();
+    // Stage 1 hint
+    var hint = document.getElementById('readyHint');
+    hint.textContent = 'Tap to engage';
+    hint.classList.add('visible');
 
     // Fetch library async (gesture has now expired — that's fine, we don't play yet)
     const ok = await fetchLibrary();
