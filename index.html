@@ -249,6 +249,44 @@
   }
   .ready-hint.visible { opacity: 1; }
 
+  /* ── INSTALL BANNER ── */
+  .install-banner {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    z-index: 150;
+    display: flex; align-items: center; gap: .7rem;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 40px; padding: .6rem 1.2rem;
+    cursor: pointer; opacity: 0;
+    animation: rise 1.4s ease 1.5s forwards;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity .2s;
+  }
+  .install-banner:hover { opacity: 0.85 !important; }
+  .install-banner-icon { font-size: .9rem; }
+  .install-banner-text {
+    font-size: .52rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink); font-family: 'Cormorant Garamond', serif;
+  }
+  .install-banner.hidden { display: none; }
+
+  /* Install instructions panel */
+  .install-steps { display: flex; flex-direction: column; gap: 1.2rem; margin-top: .5rem; }
+  .install-step { display: flex; align-items: flex-start; gap: 1rem; }
+  .install-step-num {
+    width: 1.4rem; height: 1.4rem; border-radius: 50%;
+    border: 1px solid var(--accent); color: var(--accent);
+    font-size: .5rem; letter-spacing: .1em;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: .1rem;
+  }
+  .install-step-text {
+    font-size: .78rem; font-style: italic; color: var(--ink);
+    opacity: 0.8; line-height: 1.5;
+  }
+  .install-step-text strong { font-style: normal; font-weight: 400; color: var(--accent); }
+
   @keyframes rise { from{opacity:0;transform:translateY(9px);} to{opacity:1;transform:translateY(0);} }
 </style>
 </head>
@@ -308,6 +346,26 @@
 </div>
 
 <iframe id="sc-frame" allow="autoplay" scrolling="no" frameborder="no"></iframe>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="installBanner" onclick="openPanel('install')">
+  <span class="install-banner-icon">⊕</span>
+  <span class="install-banner-text">Add to Home Screen</span>
+</div>
+
+<!-- INSTALL PANEL -->
+<div class="panel-overlay" id="panel-install" onclick="handlePanelClick(event,'install')">
+  <div class="panel-backdrop"></div>
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Add Flora to your home screen</div>
+      <button class="panel-close" onclick="closePanel('install')">Close</button>
+    </div>
+    <div class="install-steps" id="installSteps">
+      <!-- Populated by JS based on device -->
+    </div>
+  </div>
+</div>
 
 <!-- SCHEDULE PANEL -->
 <div class="panel-overlay" id="panel-schedule" onclick="handlePanelClick(event,'schedule')">
@@ -692,6 +750,54 @@ function buildSchedulePanel() {
 
 window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
 highlightSlot();
+
+// ─────────────────────────────────────────────
+// INSTALL BANNER
+// ─────────────────────────────────────────────
+(function() {
+  // Hide if already installed as PWA
+  if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+    var b = document.getElementById('installBanner');
+    if (b) b.classList.add('hidden');
+    return;
+  }
+
+  // Build device-appropriate instructions
+  var isIOS    = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  var isAndroid = /Android/.test(navigator.userAgent);
+  var isChrome = /Chrome/.test(navigator.userAgent) && !isIOS;
+
+  var steps = [];
+
+  if (isIOS) {
+    steps = [
+      { num:'1', text:'Tap the <strong>Share</strong> button at the bottom of Safari (the box with an arrow pointing up)' },
+      { num:'2', text:'Scroll down and tap <strong>Add to Home Screen</strong>' },
+      { num:'3', text:'Tap <strong>Add</strong> — Flora will appear on your home screen like a native app' }
+    ];
+  } else if (isChrome || isAndroid) {
+    steps = [
+      { num:'1', text:'Tap the <strong>three dots</strong> menu in the top right of Chrome' },
+      { num:'2', text:'Tap <strong>Add to Home Screen</strong>' },
+      { num:'3', text:'Tap <strong>Add</strong> — Flora will appear on your home screen' }
+    ];
+  } else {
+    steps = [
+      { num:'1', text:'Open floraradio.com in <strong>Safari</strong> on iPhone or <strong>Chrome</strong> on Android' },
+      { num:'2', text:'Tap the share or menu icon in your browser' },
+      { num:'3', text:'Select <strong>Add to Home Screen</strong>' }
+    ];
+  }
+
+  var html = '';
+  steps.forEach(function(s) {
+    html += '<div class="install-step">';
+    html += '<div class="install-step-num">'+s.num+'</div>';
+    html += '<div class="install-step-text">'+s.text+'</div>';
+    html += '</div>';
+  });
+  document.getElementById('installSteps').innerHTML = html;
+})();
 </script>
 </body>
 </html>
