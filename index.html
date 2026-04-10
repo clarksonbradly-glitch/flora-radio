@@ -208,6 +208,7 @@
   }
   .sched-past { opacity: 0.3; }
   .sched-past .sched-row-artist { text-decoration: line-through; text-decoration-color: var(--border); }
+  .sched-section-active { color: var(--accent) !important; opacity: 1 !important; }
   .sched-row-artist {
     font-size: .82rem; font-style: italic; color: var(--ink);
     flex: 1; line-height: 1.3;
@@ -773,26 +774,30 @@ function buildSchedulePanel() {
     return;
   }
 
-  const bucketLabel = {
-    'Morning':    'Morning Drift  ·  7AM – 12PM',
-    'Afternoon':  'The Ascent  ·  12PM – 2AM',
-    'Late Night': 'The Descent  ·  2AM – 7AM'
-  };
-  const currentBucket = getCurrentBucket();
+  // Slot definitions — wall-clock hour ranges
+  const slots = [
+    { bucket:'Morning',    label:'Morning Drift',  timeLabel:'7AM – 12PM',  startH:7,  endH:12  },
+    { bucket:'Afternoon',  label:'The Ascent',     timeLabel:'12PM – 2AM',  startH:12, endH:26  }, // 26 = 2AM next day
+    { bucket:'Late Night', label:'The Descent',    timeLabel:'2AM – 7AM',   startH:2,  endH:7   }
+  ];
 
-  // Calculate wall-clock start times
   const now = new Date(), midnight = new Date(now);
   midnight.setHours(0,0,0,0);
-  const secondsToday   = Math.floor((now - midnight) / 1000);
-  const totalDuration  = tracks.reduce((sum,t) => sum + (t.duration*60), 0);
-  const cycleOffset    = secondsToday % totalDuration;
+  const secondsToday  = Math.floor((now - midnight) / 1000);
+  const totalDuration = tracks.reduce((sum,t) => sum + (t.duration*60), 0);
+  const cycleOffset   = secondsToday % totalDuration;
   const cycleStartSecs = secondsToday - cycleOffset;
 
+  // Build cumulative start times for each track in the queue
   let elapsed = 0;
-  const startTimes = tracks.map(t => {
-    const s = elapsed;
+  const trackData = tracks.map((t, i) => {
+    const startInCycle = elapsed;
     elapsed += t.duration * 60;
-    return s;
+    // Wall clock seconds from midnight
+    const wallSecs = (cycleStartSecs + startInCycle) % 86400;
+    // Wall clock hour (fractional)
+    const wallHour = wallSecs / 3600;
+    return { track: t, index: i, wallSecs, wallHour };
   });
 
   function secsToTime(secs) {
@@ -804,27 +809,50 @@ function buildSchedulePanel() {
     return h12 + ':' + m.toString().padStart(2,'0') + ' ' + ampm;
   }
 
-  let html = '<div class="sched-section">';
-  html += '<div class="sched-section-label">' + bucketLabel[currentBucket] + '</div>';
+  // Determine which hour slot a track belongs to
+  function getSlotForHour(h) {
+    // Descent: 2–7
+    if (h >= 2 && h < 7) return 'Late Night';
+    // Morning: 7–12
+    if (h >= 7 && h < 12) return 'Morning';
+    // Ascent: 12 onwards (including midnight–2)
+    return 'Afternoon';
+  }
 
-  tracks.forEach((t, i) => {
-    const isCurrent = i === currentIndex;
-    const isPast    = i < currentIndex;
-    const wallSecs  = (cycleStartSecs + startTimes[i]) % 86400;
-    const timeLabel = secsToTime(wallSecs);
+  const currentBucket = getCurrentBucket();
+  let html = '';
 
-    html += '<div class="sched-row' + (isPast ? ' sched-past' : '') + '">';
-    html += '<div class="sched-row-time">' + timeLabel + '</div>';
-    html += '<div class="sched-row-artist">' + t.artist + ' — ' + t.title;
-    if (isCurrent) html += '<span class="sched-now">● Now</span>';
+  slots.forEach(slot => {
+    // Get tracks that fall within this slot's hours
+    const slotTracks = trackData.filter(td => getSlotForHour(td.wallHour) === slot.bucket);
+    if (!slotTracks.length) return;
+
+    const isCurrentSlot = slot.bucket === currentBucket;
+
+    html += '<div class="sched-section">';
+    html += '<div class="sched-section-label' + (isCurrentSlot ? ' sched-section-active' : '') + '">';
+    html += slot.label + '  ·  ' + slot.timeLabel;
     html += '</div>';
-    html += '<div class="sched-row-title">' + t.year + '</div>';
+
+    slotTracks.forEach(td => {
+      const isCurrent = td.index === currentIndex;
+      const isPast    = td.index < currentIndex;
+
+      html += '<div class="sched-row' + (isPast ? ' sched-past' : '') + '">';
+      html += '<div class="sched-row-time">' + secsToTime(td.wallSecs) + '</div>';
+      html += '<div class="sched-row-artist">' + td.track.artist + ' — ' + td.track.title;
+      if (isCurrent) html += '<span class="sched-now">● Now</span>';
+      html += '</div>';
+      html += '<div class="sched-row-title">' + td.track.year + '</div>';
+      html += '</div>';
+    });
+
     html += '</div>';
   });
 
-  html += '</div>';
-  list.innerHTML = html;
+  list.innerHTML = html || '<div class="sched-loading">No schedule available</div>';
 
+  // Auto-scroll to current track
   setTimeout(() => {
     const nowEl = list.querySelector('.sched-now');
     if (nowEl) nowEl.closest('.sched-row').scrollIntoView({ behavior:'smooth', block:'center' });
