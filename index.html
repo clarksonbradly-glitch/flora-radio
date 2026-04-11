@@ -209,6 +209,12 @@
   .sched-past { opacity: 0.3; }
   .sched-past .sched-row-artist { text-decoration: line-through; text-decoration-color: var(--border); }
   .sched-section-active { color: var(--accent) !important; opacity: 1 !important; }
+  .sched-sc-link {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s, opacity .2s;
+  }
+  .sched-sc-link:hover { border-bottom-color: var(--accent); opacity: 0.8; }
   .sched-row-artist {
     font-size: .82rem; font-style: italic; color: var(--ink);
     flex: 1; line-height: 1.3;
@@ -259,19 +265,21 @@
 
   /* ── INSTALL BANNER ── */
   .install-banner {
-    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    position: fixed; bottom: 1.5rem; right: 1.2rem;
     z-index: 150;
-    display: flex; align-items: center; gap: .7rem;
+    display: flex; align-items: center; gap: .6rem;
     background: var(--bg); border: 1px solid var(--border);
-    border-radius: 40px; padding: .6rem 1.2rem;
+    border-radius: 40px; padding: .55rem 1rem;
     cursor: pointer; opacity: 0;
-    animation: rise 1.4s ease 1.5s forwards;
+    animation: bannerIn 1s ease 2s forwards, bannerOut 0.6s ease 10s forwards;
     box-shadow: 0 4px 24px rgba(0,0,0,0.15);
     white-space: nowrap;
     -webkit-tap-highlight-color: transparent;
-    transition: opacity .2s;
+    transition: opacity .3s;
   }
-  .install-banner:hover { opacity: 0.85 !important; }
+  .install-banner:hover { opacity: 0.9 !important; }
+  @keyframes bannerIn  { from{opacity:0;transform:translateY(6px);} to{opacity:0.75;transform:translateY(0);} }
+  @keyframes bannerOut { from{opacity:0.75;} to{opacity:0; pointer-events:none;} }
   .install-banner-icon { font-size: .9rem; }
   .install-banner-text {
     font-size: .52rem; letter-spacing: .18em; text-transform: uppercase;
@@ -858,7 +866,11 @@ async function buildSchedulePanel() {
     slotTrackData.forEach(td => {
       html += '<div class="sched-row' + (td.isPast ? ' sched-past' : '') + '">';
       html += '<div class="sched-row-time">' + secsToTime(td.wallSecs) + '</div>';
-      html += '<div class="sched-row-artist">' + td.track.artist + ' — ' + td.track.title;
+      const scUrl = td.track.url || '#';
+      html += '<div class="sched-row-artist">';
+      html += '<a class="sched-sc-link" href="' + scUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">';
+      html += td.track.artist + ' — ' + td.track.title;
+      html += '</a>';
       if (td.isNow) html += '<span class="sched-now">● Now</span>';
       html += '</div>';
       html += '<div class="sched-row-title">' + td.track.year + '</div>';
