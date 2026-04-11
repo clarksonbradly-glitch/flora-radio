@@ -789,9 +789,9 @@ async function buildSchedulePanel() {
   list.innerHTML = '<div class="sched-loading">Loading schedule</div>';
 
   const slotDefs = [
-    { bucket:'Morning',    label:'Morning Drift', timeLabel:'7AM – 12PM',  startH:7,  endH:12 },
-    { bucket:'Afternoon',  label:'The Ascent',    timeLabel:'12PM – 2AM',  startH:12, endH:26 },
-    { bucket:'Late Night', label:'The Descent',   timeLabel:'2AM – 7AM',   startH:2,  endH:7  }
+    { bucket:'Morning',    label:'Morning Drift', timeLabel:'7AM – 12PM', startSecs: 7*3600,  endSecs: 12*3600          },
+    { bucket:'Afternoon',  label:'The Ascent',    timeLabel:'12PM – 2AM', startSecs: 12*3600, endSecs: 26*3600          },
+    { bucket:'Late Night', label:'The Descent',   timeLabel:'2AM – 7AM',  startSecs: 2*3600,  endSecs: 7*3600           }
   ];
 
   const currentBucket = getCurrentBucket();
@@ -801,27 +801,21 @@ async function buildSchedulePanel() {
 
   function secsToTime(secs) {
     const s = ((secs % 86400) + 86400) % 86400;
-    const totalMins = Math.floor(s / 60);
-    const h    = Math.floor(totalMins / 60) % 24;
-    const m    = totalMins % 60;
+    const h    = Math.floor(s / 3600) % 24;
+    const m    = Math.floor((s % 3600) / 60);
     const ampm = h < 12 ? 'AM' : 'PM';
     const h12  = h % 12 || 12;
     return h12 + ':' + m.toString().padStart(2,'0') + ' ' + ampm;
   }
 
-  // Slot start times in seconds from midnight
-  const slotStartSecs = { Morning: 7*3600, Afternoon: 12*3600, 'Late Night': 2*3600 };
-  // Slot end times in seconds from midnight
-  const slotEndSecs   = { Morning: 12*3600, Afternoon: 26*3600, 'Late Night': 7*3600 };
-
   let html = '';
 
   for (const slot of slotDefs) {
-    // Fetch this bucket's mixes
+    // For the current bucket use the EXACT same tracks array already playing
+    // For other buckets fetch and shuffle with same daily seed
     let bucketTracks;
     if (slot.bucket === currentBucket && tracks.length) {
-      // Use already-loaded current tracks (already shuffled with today's seed)
-      bucketTracks = tracks;
+      bucketTracks = tracks; // same order as what's actually playing
     } else {
       const raw = await fetchBucket(slot.bucket);
       bucketTracks = shuffleWithSeed(raw, getDailySeed());
@@ -830,28 +824,28 @@ async function buildSchedulePanel() {
     if (!bucketTracks.length) continue;
 
     const isCurrentSlot = slot.bucket === currentBucket;
-    const slotStart = slotStartSecs[slot.bucket];
+    const slotDurSecs   = slot.endSecs - slot.startSecs;
 
-    // Calculate start times within this slot
+    // Walk through tracks, assigning times, stop when slot is full
     let elapsed = 0;
-    const slotEnd = slotEndSecs[slot.bucket];
-    const slotDurationSecs = ((slotEnd - slotStart) + 86400) % 86400;
-
-    // Build track list with times, only include tracks that fit in the slot
     const slotTrackData = [];
+
     for (let i = 0; i < bucketTracks.length; i++) {
-      const t = bucketTracks[i];
-      const trackStart = slotStart + elapsed;
-      const trackEnd   = trackStart + (t.duration * 60);
-      // Stop adding once we exceed the slot window
-      if (elapsed >= slotDurationSecs) break;
-      slotTrackData.push({
-        track: t,
-        wallSecs: trackStart % 86400,
-        isCurrentTrack: isCurrentSlot && i === currentIndex,
-        isPast: isCurrentSlot && i < currentIndex
-      });
-      elapsed += t.duration * 60;
+      if (elapsed >= slotDurSecs) break;
+      const t         = bucketTracks[i];
+      const wallSecs  = slot.startSecs + elapsed;
+      const trackDur  = t.duration * 60;
+
+      // Determine if this track is currently playing
+      // For current slot: compare by url match against active track
+      const isNow = isCurrentSlot && tracks[currentIndex] && t.url === tracks[currentIndex].url;
+
+      // Determine if past: wall clock end time has passed
+      const trackEndWall = wallSecs + trackDur;
+      const isPast = trackEndWall < nowSecs && !isNow;
+
+      slotTrackData.push({ track: t, wallSecs, isNow, isPast });
+      elapsed += trackDur;
     }
 
     if (!slotTrackData.length) continue;
@@ -865,7 +859,7 @@ async function buildSchedulePanel() {
       html += '<div class="sched-row' + (td.isPast ? ' sched-past' : '') + '">';
       html += '<div class="sched-row-time">' + secsToTime(td.wallSecs) + '</div>';
       html += '<div class="sched-row-artist">' + td.track.artist + ' — ' + td.track.title;
-      if (td.isCurrentTrack) html += '<span class="sched-now">● Now</span>';
+      if (td.isNow) html += '<span class="sched-now">● Now</span>';
       html += '</div>';
       html += '<div class="sched-row-title">' + td.track.year + '</div>';
       html += '</div>';
@@ -876,7 +870,6 @@ async function buildSchedulePanel() {
 
   list.innerHTML = html || '<div class="sched-loading">No mixes scheduled</div>';
 
-  // Auto scroll to current track
   setTimeout(() => {
     const nowEl = list.querySelector('.sched-now');
     if (nowEl) nowEl.closest('.sched-row').scrollIntoView({ behavior:'smooth', block:'center' });
