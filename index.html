@@ -85,11 +85,58 @@
   .eq.active { opacity:1; }
   .eq-bar { width:2px; background:var(--accent); border-radius:2px 2px 0 0; height:3px; transition:height .09s ease, background 1.2s ease; }
 
-  .play-btn { width:68px; height:68px; border-radius:50%; border:1.5px solid var(--ink); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; position:relative; transition:border-color .3s,transform .3s; outline:none; -webkit-tap-highlight-color:transparent; }
-  .play-btn::before { content:''; position:absolute; width:82px; height:82px; border-radius:50%; border:1px solid var(--border); transition:border-color 1.2s ease; }
-  .play-btn:hover { border-color:var(--accent); transform:scale(1.04); }
-  .play-btn.playing { border-color:var(--accent); }
-  .play-btn.playing::before { animation:breathe 2.6s ease-in-out infinite; border-color:var(--accent); opacity:0.3; }
+  /* ── PLAYER BUTTON STATES ── */
+
+  /* Wrapper holds both loading ring and play button, sized to largest */
+  .player-btn-wrap {
+    position: relative;
+    width: 82px; height: 82px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Loading ring — shown on page load while preparing */
+  .loading-ring {
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    animation: ringPulse 2.2s ease-in-out infinite;
+    transition: opacity .6s ease;
+    pointer-events: none;
+  }
+  .loading-ring::after {
+    content: '';
+    position: absolute; inset: 8px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    opacity: 0.5;
+    animation: ringPulse 2.2s ease-in-out infinite .4s;
+  }
+  @keyframes ringPulse {
+    0%,100% { transform: scale(1); opacity: 0.4; }
+    50%      { transform: scale(1.08); opacity: 0.9; }
+  }
+  .loading-ring.hidden { opacity: 0; pointer-events: none; }
+
+  /* Play button — hidden until ready */
+  .play-btn {
+    position: absolute;
+    width: 68px; height: 68px;
+    border-radius: 50%; border: 1.5px solid var(--ink);
+    background: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .3s, transform .3s, opacity .6s ease;
+    outline: none; -webkit-tap-highlight-color: transparent;
+    opacity: 0; pointer-events: none;
+  }
+  .play-btn::before {
+    content: ''; position: absolute;
+    width: 82px; height: 82px; border-radius: 50%;
+    border: 1px solid var(--border); transition: border-color 1.2s ease;
+  }
+  .play-btn.ready { opacity: 1; pointer-events: all; }
+  .play-btn:hover { border-color: var(--accent); transform: scale(1.04); }
+  .play-btn.playing { border-color: var(--accent); }
+  .play-btn.playing::before { animation: breathe 2.6s ease-in-out infinite; border-color: var(--accent); opacity: 0.3; }
   @keyframes breathe { 0%,100%{transform:scale(1);opacity:.3;} 50%{transform:scale(1.14);opacity:.1;} }
 
   .icon-play { width:0; height:0; border-top:9px solid transparent; border-bottom:9px solid transparent; border-left:15px solid var(--ink); margin-left:4px; transition:border-left-color 1.2s ease; }
@@ -248,20 +295,49 @@
   .about-footer a { color: var(--ink); opacity: 0.6; text-decoration: none; border-bottom: 1px solid var(--border); }
   .about-footer a:hover { opacity: 1; }
 
+  /* ── TRANSMISSION LOADING STATE ── */
+  .play-btn.loading { border-color: var(--accent); opacity: 0.5; pointer-events: none; }
+  .play-btn.loading::before { animation: breathe 2s ease-in-out infinite; border-color: var(--accent); opacity: 0.4; }
+  .play-btn.loading .icon-play { opacity: 0; }
+
+  /* Loading ring — shown inside button while entering transmission */
+  .loading-ring {
+    position: absolute;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    border-top-color: transparent;
+    animation: spin 1.2s linear infinite;
+    opacity: 0;
+    transition: opacity .4s ease;
+  }
+  .play-btn.loading .loading-ring { opacity: 0.8; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Entering transmission text */
+  .transmission-label {
+    margin-top: .9rem;
+    font-size: .52rem; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--ink); opacity: 0;
+    transition: opacity .6s ease;
+    min-height: 1rem;
+  }
+  .transmission-label.visible { opacity: 0.55; animation: pulse 2s ease-in-out infinite; }
+
   /* ── TWO-STAGE PLAY BUTTON ── */
   /* Tuning state: button pulses softly, ready hint appears */
   .play-btn.tuning { border-color: var(--accent); }
   .play-btn.tuning::before { animation: breathe 1.4s ease-in-out infinite; border-color: var(--accent); opacity: 0.3; }
   .play-btn.tuning .icon-play { border-left-color: var(--accent); opacity: 0.4; }
 
-  .ready-hint {
+  .transmission-label.accent {
     margin-top: .9rem;
-    font-size: .52rem; letter-spacing: .2em; text-transform: uppercase;
+    font-size: .52rem; letter-spacing: .22em; text-transform: uppercase;
     color: var(--accent); opacity: 0;
-    transition: opacity .4s ease;
-    animation: pulse 1.6s ease-in-out infinite;
+    transition: opacity .5s ease;
+    min-height: 1rem;
   }
-  .ready-hint.visible { opacity: 1; }
+  .transmission-label.accent.visible { opacity: 1; animation: pulse 1.8s ease-in-out infinite; }
 
   /* ── SCHEDULE SLOTS ── */
   .schedule { display:flex; flex-direction:row; align-items:center; justify-content:center; width:100%; max-width:520px; animation:rise 1.4s ease .4s both; }
@@ -374,11 +450,15 @@
       <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
       <div class="eq-bar"></div>
     </div>
-    <button class="play-btn" id="playBtn" onclick="togglePlay()">
-      <div class="icon-play"></div>
-      <div class="icon-pause"><span></span><span></span></div>
-    </button>
-    <div class="ready-hint" id="readyHint"></div>
+    <div class="player-btn-wrap">
+      <div class="loading-ring" id="loadingRing"></div>
+      <button class="play-btn loading" id="playBtn" onclick="togglePlay()">
+        <div class="icon-play"></div>
+        <div class="icon-pause"><span></span><span></span></div>
+      </button>
+    </div>
+    <div class="transmission-label visible" id="transmissionLabel">Entering the transmission</div>
+    <div class="transmission-label accent" id="tapLabel">Tap to listen</div>
     <div class="now-playing" id="nowPlaying">
       <div class="np-label">Now playing <span class="ident-dot" id="identDot"></span></div>
       <div class="np-title" id="npTitle">—</div>
@@ -661,13 +741,12 @@ function initWidget(track, offsetSecs, autoplay) {
     widgetReady = true;
 
     if (autoplay) {
-      // Auto-play for track transitions (mid-session, audio already unlocked)
+      // Track transition mid-session — audio already unlocked
       widget.play();
+      setAppState('playing');
     } else {
-      // Stage 1 complete — update hint to "Tap to listen"
-      var hint = document.getElementById('readyHint');
-      hint.textContent = 'Tap to listen';
-      hint.classList.add('visible');
+      // First load complete — transition to ready state smoothly
+      setAppState('ready');
     }
   });
   widget.bind(SC.Widget.Events.FINISH, function() {
@@ -711,75 +790,100 @@ function updateNowPlaying(track, offsetSecs) {
 }
 
 // ─────────────────────────────────────────────
-// TWO-STAGE PLAY
-// Stage 1 (first tap): fetch library, load widget — show "Tap to listen"
-// Stage 2 (second tap): widget.play() fires clean from user gesture
+// PLAY STATE MACHINE
+//
+// loading — page load, widget pre-warming silently
+//           Button disabled, "Entering the transmission" shown
+//
+// ready   — widget loaded, waiting for tap
+//           Play button active, "Tap to listen" pulsing
+//
+// playing — audio running
+//           Pause button shown, hint fades OUT
+//
+// paused  — user paused
+//           Play button, "Tap to listen" fades back IN
 // ─────────────────────────────────────────────
-let widgetReady = false; // true once SC widget has fired READY
+let widgetReady = false;
+let appState    = 'loading';
 
-async function togglePlay() {
+const enteringEl = document.getElementById('transmissionLabel');
+const hintEl     = document.getElementById('tapLabel');
 
-  // ── STAGE 1: First tap — prepare everything ──
-  if (!libraryLoaded && !widgetReady) {
-    btn.classList.add('tuning');
-    window.speechSynthesis.getVoices();
-    // Stage 1 hint
-    var hint = document.getElementById('readyHint');
-    hint.textContent = 'Tap to engage';
-    hint.classList.add('visible');
+function setAppState(state) {
+  appState = state;
 
-    // Fetch library async (gesture has now expired — that's fine, we don't play yet)
-    const ok = await fetchLibrary();
-    if (!ok || !tracks.length) {
-      document.getElementById('npTitle').textContent = 'No mixes found — add some in Airtable';
-      np.classList.add('visible');
-      btn.classList.remove('tuning');
-      return;
-    }
-
-    // Load the widget silently — no autoplay
-    initWidget(tracks[currentIndex], startOffset, false);
-    // readyHint appears once widget fires READY (handled in initWidget callback)
-    return;
+  if (state === 'loading') {
+    btn.classList.add('loading');
+    btn.classList.remove('tuning','playing');
+    if (enteringEl) { enteringEl.textContent = 'Entering the transmission'; enteringEl.classList.add('visible'); }
+    if (hintEl) hintEl.classList.remove('visible');
   }
 
-  // ── STAGE 2: Widget ready, user taps again — PLAY ──
-  if (widgetReady && !playing) {
+  if (state === 'ready') {
+    btn.classList.remove('loading','tuning','playing');
+    // Hide loading ring, fade in play button
+    var ring = document.getElementById('loadingRing');
+    if (ring) ring.classList.add('hidden');
+    btn.classList.add('ready');
+    if (enteringEl) enteringEl.classList.remove('visible');
+    setTimeout(function() {
+      if (hintEl) hintEl.classList.add('visible');
+    }, 500);
+  }
+
+  if (state === 'playing') {
     playing = true;
-    widget.play(); // clean synchronous call — browser honours it
-    btn.classList.remove('tuning');
+    btn.classList.remove('loading','tuning');
     btn.classList.add('playing');
     eq.classList.add('active');
-    document.getElementById('readyHint').classList.remove('visible');
+    // Fade out "Tap to listen" once music starts
+    if (hintEl) hintEl.classList.remove('visible');
+    if (enteringEl) enteringEl.classList.remove('visible');
     np.classList.add('visible');
-    runEQ();
-    scheduleCallouts();
-    return;
   }
 
-  // ── PAUSE ──
-  if (playing) {
+  if (state === 'paused') {
     playing = false;
-    if (widget) widget.pause();
-    btn.classList.remove('playing');
+    btn.classList.remove('playing','loading','tuning');
     eq.classList.remove('active');
     clearTimeout(eqTimer);
     clearInterval(identTimer);
-    bars.forEach(b => b.style.height = '3px');
+    bars.forEach(function(b) { b.style.height = '3px'; });
     window.speechSynthesis.cancel();
     isSpeaking = false;
     dot.classList.remove('speaking');
     setVol(100);
+    // Fade "Tap to listen" back in when paused
+    setTimeout(function() {
+      if (hintEl) hintEl.classList.add('visible');
+    }, 200);
+  }
+}
+
+function togglePlay() {
+  window.speechSynthesis.getVoices();
+
+  // Loading — ignore tap, widget not ready
+  if (appState === 'loading') return;
+
+  // Ready or paused — play fires synchronously from this gesture
+  if (appState === 'ready' || appState === 'paused') {
+    if (widget) {
+      widget.play();
+      setAppState('playing');
+      runEQ();
+      scheduleCallouts();
+    }
     return;
   }
 
-  // ── RESUME after pause ──
-  playing = true;
-  if (widget) widget.play();
-  btn.classList.add('playing');
-  eq.classList.add('active');
-  runEQ();
-  scheduleCallouts();
+  // Playing — pause
+  if (appState === 'playing') {
+    if (widget) widget.pause();
+    setAppState('paused');
+    return;
+  }
 }
 
 function runEQ(){
@@ -930,7 +1034,28 @@ async function buildSchedulePanel() {
   }, 300);
 }
 
-window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+window.speechSynthesis.onvoiceschanged = loadVoice;
+loadVoice();
+
+// ── STARTUP: show "Entering the transmission" and preload silently ──
+(function() {
+  // Show loading state immediately
+  setAppState('loading');
+
+  // Fetch library and pre-warm widget in background before user taps
+  fetchLibrary().then(function(ok) {
+    if (!ok || !tracks.length) {
+      var el = document.getElementById('transmissionLabel');
+      if (el) el.textContent = 'No mixes found — check Airtable';
+      return;
+    }
+    // Silently load widget — setAppState('ready') fires when SC.Widget READY event fires
+    initWidget(tracks[currentIndex], startOffset, false);
+  }).catch(function() {
+    var el = document.getElementById('transmissionLabel');
+    if (el) el.textContent = 'Connection error — refresh to retry';
+  });
+})();
 
 // ─────────────────────────────────────────────
 // INSTALL BANNER
