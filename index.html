@@ -561,6 +561,32 @@ function getCurrentBucket() {
   return 'Afternoon';
 }
 
+// ── SLOT POPUPS ──
+const slotPopups = {
+  day:     { time:'7AM – 12PM',  title:'Morning Drift', body:'A morning selection of deep house, afro house, and organic electronica. Curated to ease you into your day with warm, textured sounds and a steady, unhurried groove.' },
+  evening: { time:'12PM – 2AM', title:'The Ascent',    body:'A continuous programme of house, tech house, progressive, and Chicago-influenced sets. Designed to build energy and elevate your mood through the afternoon and into the night.' },
+  night:   { time:'2AM – 7AM',  title:'The Descent',   body:'Late night programming for the dedicated listener. Deep techno, industrial, and dark electronic music for the after-hours hours. Uncompromising and immersive.' }
+};
+
+const overlayEl = document.getElementById('overlay');
+
+function openPopup(s) {
+  const sl = slotPopups[s];
+  document.getElementById('popupTime').textContent  = sl.time;
+  document.getElementById('popupTitle').textContent = sl.title;
+  document.getElementById('popupBody').textContent  = sl.body;
+  overlayEl.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePopup() {
+  overlayEl.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function handleOverlayClick(e) {
+  if (e.target === overlayEl || e.target.classList.contains('overlay-backdrop')) closePopup();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+
 function highlightSlot() {
   applyTheme(getCurrentBucket());
 }
