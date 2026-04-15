@@ -263,6 +263,41 @@
   }
   .ready-hint.visible { opacity: 1; }
 
+  /* ── SCHEDULE SLOTS ── */
+  .schedule { display:flex; flex-direction:row; align-items:center; justify-content:center; width:100%; max-width:520px; animation:rise 1.4s ease .4s both; }
+  .sched-item { display:flex; flex-direction:column; align-items:center; gap:.25rem; flex:1; cursor:pointer; padding:.6rem .4rem; transition:opacity .2s; -webkit-tap-highlight-color:transparent; }
+  .sched-item:hover { opacity:.6; }
+  .sched-item+.sched-item { border-left:1px solid var(--border); }
+  .sched-time { font-size:.5rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); white-space:nowrap; opacity:0.6; }
+  .sched-genre { font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); font-weight:400; white-space:nowrap; }
+  .sched-hint { width:12px; height:1px; background:var(--border); margin-top:.25rem; transition:width .3s ease,background .3s; }
+  .sched-item:hover .sched-hint { width:20px; background:var(--accent); }
+  .sched-item.now-slot .sched-genre { color:var(--accent); }
+  .sched-item.now-slot .sched-hint { width:20px; background:var(--accent); }
+  .sched-item.now-slot .sched-time { opacity:1; }
+
+  /* ── ATTRIBUTION ── */
+  .attribution { margin-top:.8rem; opacity:0; transform:translateY(4px); transition:opacity .5s ease .2s, transform .5s ease .2s; text-align:center; }
+  .attribution.visible { opacity:1; transform:translateY(0); }
+  .attr-link { font-size:.5rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); opacity:0.5; text-decoration:none; border-bottom:1px solid var(--border); padding-bottom:1px; transition:opacity .2s; }
+  .attr-link:hover { opacity:0.9; color:var(--accent); }
+  .attr-divider { margin:0 .5rem; opacity:.3; font-size:.5rem; }
+  .attr-disclaimer { display:block; margin-top:.35rem; font-size:.4rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink); opacity:0.35; font-style:italic; }
+
+  /* ── POPUP ── */
+  .overlay { position:fixed; inset:0; z-index:200; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; padding:0 1rem 2rem; }
+  .overlay.open { pointer-events:all; }
+  .overlay-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0); transition:background .35s ease; z-index:-1; }
+  .overlay.open .overlay-backdrop { background:rgba(0,0,0,0.45); }
+  .popup { width:100%; max-width:420px; background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:2rem 2rem 1.8rem; text-align:center; transform:translateY(24px); opacity:0; transition:transform .38s cubic-bezier(.22,1,.36,1),opacity .3s ease; box-shadow:0 8px 40px rgba(0,0,0,0.2); position:relative; }
+  .overlay.open .popup { transform:translateY(0); opacity:1; }
+  .popup-time { font-size:.5rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink); margin-bottom:.5rem; opacity:0.6; }
+  .popup-title { font-size:clamp(1.3rem,4vw,1.7rem); font-weight:300; letter-spacing:.08em; color:var(--ink); margin-bottom:.9rem; line-height:1.1; }
+  .popup-rule { width:28px; height:1px; background:var(--accent); margin:0 auto 1rem; }
+  .popup-body { font-size:clamp(.82rem,2vw,.92rem); font-weight:300; line-height:1.75; color:var(--ink); opacity:0.75; font-style:italic; }
+  .popup-close { position:absolute; top:1rem; right:1.2rem; background:none; border:none; cursor:pointer; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); font-family:'Cormorant Garamond',serif; opacity:0.5; transition:opacity .2s; outline:none; }
+  .popup-close:hover { opacity:1; }
+
   /* ── INSTALL BANNER ── */
   .install-banner {
     position: fixed; bottom: 1.5rem; right: 1.2rem;
@@ -349,19 +384,49 @@
       <div class="np-title" id="npTitle">—</div>
       <div class="np-meta" id="npMeta"></div>
       <a class="np-sc-link" id="npScLink" href="#" target="_blank" rel="noopener"></a>
+      <div class="attribution" id="attribution">
+        <a class="attr-link" id="attrSoundcloud" href="#" target="_blank" rel="noopener">Streamed via SoundCloud</a>
+        <span class="attr-divider">·</span>
+        <a class="attr-link" id="attrArtistPage" href="#" target="_blank" rel="noopener">Artist Page ↗</a>
+        <span class="attr-disclaimer">Flora does not host or own any audio content. All rights remain with the respective artists.</span>
+      </div>
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
-  <div class="bottom-nav">
-    <button class="nav-btn" onclick="openPanel('schedule')">Schedule</button>
-    <div class="nav-dot"></div>
-    <button class="nav-btn" onclick="openPanel('about')">About</button>
+  <!-- SCHEDULE SLOTS -->
+  <div class="schedule">
+    <div class="sched-item" id="slot-day" onclick="openPopup('day')">
+      <div class="sched-time">7AM – 12PM</div>
+      <div class="sched-genre">Morning Drift</div>
+      <div class="sched-hint"></div>
+    </div>
+    <div class="sched-item" id="slot-evening" onclick="openPopup('evening')">
+      <div class="sched-time">12PM – 2AM</div>
+      <div class="sched-genre">The Ascent</div>
+      <div class="sched-hint"></div>
+    </div>
+    <div class="sched-item" id="slot-night" onclick="openPopup('night')">
+      <div class="sched-time">2AM – 7AM</div>
+      <div class="sched-genre">The Descent</div>
+      <div class="sched-hint"></div>
+    </div>
   </div>
 
 </div>
 
 <iframe id="sc-frame" allow="autoplay" scrolling="no" frameborder="no"></iframe>
+
+<!-- SLOT POPUPS -->
+<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+  <div class="overlay-backdrop"></div>
+  <div class="popup" id="popup">
+    <button class="popup-close" onclick="closePopup()">Close</button>
+    <div class="popup-time" id="popupTime"></div>
+    <div class="popup-title" id="popupTitle"></div>
+    <div class="popup-rule"></div>
+    <div class="popup-body" id="popupBody"></div>
+  </div>
+</div>
 
 <!-- INSTALL BANNER -->
 <div class="install-banner" id="installBanner" onclick="openPanel('install')">
@@ -383,40 +448,7 @@
   </div>
 </div>
 
-<!-- SCHEDULE PANEL -->
-<div class="panel-overlay" id="panel-schedule" onclick="handlePanelClick(event,'schedule')">
-  <div class="panel-backdrop"></div>
-  <div class="panel" id="schedule-panel-content">
-    <div class="panel-header">
-      <div class="panel-title">Today's transmission</div>
-      <button class="panel-close" onclick="closePanel('schedule')">Close</button>
-    </div>
-    <div class="sched-list" id="schedList">
-      <div class="sched-loading">Loading schedule</div>
-    </div>
-  </div>
-</div>
 
-<!-- ABOUT PANEL -->
-<div class="panel-overlay" id="panel-about" onclick="handlePanelClick(event,'about')">
-  <div class="panel-backdrop"></div>
-  <div class="panel">
-    <div class="panel-header">
-      <div class="panel-title">About Flora</div>
-      <button class="panel-close" onclick="closePanel('about')">Close</button>
-    </div>
-    <div class="about-body">
-      Flora is a continuous electronic music transmission — a curated radio station playing premier DJ mixes from across the decades. No playlists, no skipping. Just the music, sequenced by time of day and reshuffled every morning at midnight.
-    </div>
-    <div class="about-rule"></div>
-    <div class="about-footer">
-      All mixes streamed via SoundCloud.<br>
-      Flora does not host or own any audio content.<br>
-      All rights remain with the respective artists.<br><br>
-      <a href="https://soundcloud.com" target="_blank" rel="noopener">SoundCloud ↗</a>
-    </div>
-  </div>
-</div>
 
 <script src="https://w.soundcloud.com/player/api.js"></script>
 <script>
@@ -666,6 +698,16 @@ function updateNowPlaying(track, offsetSecs) {
       scLink.style.visibility = 'hidden';
     }
   }
+  // Attribution footer
+  var attrEl = document.getElementById('attribution');
+  var attrSC = document.getElementById('attrSoundcloud');
+  var attrAP = document.getElementById('attrArtistPage');
+  if (attrEl && attrSC && attrAP) {
+    attrSC.href = track.url || '#';
+    attrAP.href = track.artistSC || '#';
+    attrAP.textContent = track.artist + ' on SoundCloud ↗';
+    attrEl.classList.add('visible');
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -889,7 +931,6 @@ async function buildSchedulePanel() {
 }
 
 window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-highlightSlot();
 
 // ─────────────────────────────────────────────
 // INSTALL BANNER
