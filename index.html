@@ -1065,6 +1065,9 @@ window.speechSynthesis.onvoiceschanged = loadVoice;
 loadVoice();
 
 // ── STARTUP: show "Entering the transmission" and preload silently ──
+// Apply theme immediately on load
+highlightSlot();
+
 (function() {
   // Show loading state immediately
   setAppState('loading');
