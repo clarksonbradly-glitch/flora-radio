@@ -783,6 +783,42 @@ function speakTransition(bucket, cb) {
 function scheduleCallouts(){clearInterval(identTimer);identTimer=setInterval(()=>{if(playing)artistCallout();},IDENT_MS);}
 
 // ─────────────────────────────────────────────
+// SLOT BOUNDARY MONITOR
+// Checks every 60 seconds if the time slot has changed
+// If a mix is still playing past the boundary, transitions immediately
+// ─────────────────────────────────────────────
+var slotMonitorTimer = null;
+
+function startSlotMonitor() {
+  clearInterval(slotMonitorTimer);
+  slotMonitorTimer = setInterval(function() {
+    if (!playing) return;
+    var currentBucket = getCurrentBucket();
+    if (currentBucket !== lastBucket) {
+      console.log('Flora: slot boundary crossed — transitioning from', lastBucket, 'to', currentBucket);
+      // Fade out current audio
+      ramp(100, 0, 2000, function() {
+        if (widget) widget.pause();
+        lastBucket = currentBucket;
+        // Speak transition announcement
+        speakTransition(currentBucket, function() {
+          // Reset and fetch new bucket
+          tracks = []; libraryLoaded = false; _fetchPromise = null;
+          fetchLibrary().then(function(ok) {
+            if (!ok || !tracks.length) return;
+            applyTheme(currentBucket);
+            highlightSlot();
+            currentIndex = 0;
+            setVol(100);
+            initWidget(tracks[currentIndex], 0, true);
+          });
+        });
+      });
+    }
+  }, 60000); // check every 60 seconds
+}
+
+// ─────────────────────────────────────────────
 // SOUNDCLOUD WIDGET
 // ─────────────────────────────────────────────
 let widget=null,playing=false,eqTimer=null;
@@ -959,6 +995,7 @@ function setAppState(state) {
     if (hintEl) hintEl.classList.remove('visible');
     if (enteringEl) enteringEl.classList.remove('visible');
     np.classList.add('visible');
+    startSlotMonitor();
   }
 
   if (state === 'paused') {
@@ -967,6 +1004,7 @@ function setAppState(state) {
     eq.classList.remove('active');
     clearTimeout(eqTimer);
     clearInterval(identTimer);
+    clearInterval(slotMonitorTimer);
     bars.forEach(function(b) { b.style.height = '3px'; });
     window.speechSynthesis.cancel();
     isSpeaking = false;
