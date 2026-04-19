@@ -794,8 +794,12 @@ const bars = document.querySelectorAll('.eq-bar');
 function initWidget(track, offsetSecs, autoplay) {
   widgetReady = false;
   const frame = document.getElementById('sc-frame');
+  // For mid-session transitions use auto_play=true in the iframe URL
+  // This is more reliable than calling widget.play() programmatically
+  // since the audio context is already unlocked from the original user tap
+  var autoPlayParam = autoplay ? 'true' : 'false';
   frame.src = 'https://w.soundcloud.com/player/?url='+encodeURIComponent(track.url)+
-    '&auto_play=false&buying=false&liking=false&download=false&sharing=false'+
+    '&auto_play='+autoPlayParam+'&buying=false&liking=false&download=false&sharing=false'+
     '&show_artwork=false&show_comments=false&show_playcount=false'+
     '&show_user=false&hide_related=true&visual=false&color=%23c8503a';
   widget = SC.Widget(frame);
@@ -805,11 +809,10 @@ function initWidget(track, offsetSecs, autoplay) {
     widgetReady = true;
 
     if (autoplay) {
-      // Track transition mid-session — audio already unlocked
-      widget.play();
+      // auto_play=true already set in iframe — just update app state
       setAppState('playing');
     } else {
-      // First load complete — transition to ready state smoothly
+      // First load — wait for user tap
       setAppState('ready');
     }
   });
