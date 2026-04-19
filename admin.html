@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flora — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #080a0d;
+    --panel: #0e1218;
+    --border: rgba(255,255,255,0.07);
+    --ink: #c8d4e0;
+    --soft: #5a6a7a;
+    --accent: #c8503a;
+    --green: #3acc8a;
+    --amber: #c8a03a;
+    --blue: #3a7acc;
+    --mono: 'JetBrains Mono', monospace;
+    --serif: 'Cormorant Garamond', Georgia, serif;
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--ink); font-family: var(--mono); }
+
+  /* ── LOGIN ── */
+  #loginScreen {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+  }
+  .login-box {
+    width: 320px; text-align: center;
+  }
+  .login-logo {
+    font-family: var(--serif); font-size: 2.4rem; font-weight: 300;
+    letter-spacing: .3em; color: var(--ink); margin-bottom: .4rem;
+  }
+  .login-sub {
+    font-size: .55rem; letter-spacing: .3em; text-transform: uppercase;
+    color: var(--soft); margin-bottom: 2.5rem;
+  }
+  .login-label {
+    font-size: .5rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--soft); display: block; text-align: left; margin-bottom: .5rem;
+  }
+  .login-input {
+    width: 100%; background: var(--panel); border: 1px solid var(--border);
+    color: var(--ink); font-family: var(--mono); font-size: .75rem;
+    padding: .75rem 1rem; border-radius: 3px; outline: none;
+    transition: border-color .2s;
+  }
+  .login-input:focus { border-color: var(--accent); }
+  .login-btn {
+    width: 100%; margin-top: 1rem;
+    background: var(--accent); border: none; color: #fff;
+    font-family: var(--mono); font-size: .55rem; letter-spacing: .2em;
+    text-transform: uppercase; padding: .8rem; border-radius: 3px;
+    cursor: pointer; transition: opacity .2s;
+  }
+  .login-btn:hover { opacity: .85; }
+  .login-error {
+    font-size: .55rem; color: var(--accent); margin-top: .8rem;
+    letter-spacing: .1em; min-height: 1rem;
+  }
+
+  /* ── DASHBOARD ── */
+  #dashboard { display: none; min-height: 100vh; }
+
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 2rem; border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; background: var(--bg); z-index: 10;
+  }
+  .header-logo { font-family: var(--serif); font-size: 1.4rem; font-weight: 300; letter-spacing: .3em; }
+  .header-label { font-size: .45rem; letter-spacing: .25em; text-transform: uppercase; color: var(--soft); }
+  .header-right { display: flex; align-items: center; gap: 1.5rem; }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: blink .8s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.2;} }
+  .live-text { font-size: .45rem; letter-spacing: .2em; text-transform: uppercase; color: var(--green); }
+  .logout-btn {
+    font-family: var(--mono); font-size: .45rem; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--soft); background: none;
+    border: 1px solid var(--border); padding: .4rem .8rem; border-radius: 3px;
+    cursor: pointer; transition: all .2s;
+  }
+  .logout-btn:hover { color: var(--ink); border-color: var(--ink); }
+
+  .main { padding: 2rem; display: grid; gap: 1.5rem; }
+
+  /* ── TOP ROW ── */
+  .top-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+
+  /* ── PANEL ── */
+  .panel {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1.4rem;
+  }
+  .panel-title {
+    font-size: .45rem; letter-spacing: .25em; text-transform: uppercase;
+    color: var(--soft); margin-bottom: 1.2rem; display: flex;
+    align-items: center; justify-content: space-between;
+  }
+  .panel-title .badge {
+    font-size: .4rem; padding: .2rem .5rem; border-radius: 2px;
+    background: rgba(255,255,255,0.05); letter-spacing: .15em;
+  }
+
+  /* ── NOW PLAYING ── */
+  .now-playing-panel { grid-column: span 2; }
+  .np-artist { font-family: var(--serif); font-size: 1.6rem; font-weight: 300; color: var(--ink); margin-bottom: .2rem; font-style: italic; }
+  .np-title  { font-size: .65rem; color: var(--soft); letter-spacing: .1em; margin-bottom: 1.2rem; }
+  .np-meta   { font-size: .5rem; letter-spacing: .15em; text-transform: uppercase; color: var(--soft); margin-bottom: 1.4rem; }
+
+  .progress-bar { width: 100%; height: 2px; background: rgba(255,255,255,0.08); border-radius: 1px; margin-bottom: .6rem; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 1px; transition: width 1s linear; width: 0%; }
+  .progress-times { display: flex; justify-content: space-between; font-size: .45rem; color: var(--soft); }
+
+  /* ── SLOT STATUS ── */
+  .slot-name {
+    font-family: var(--serif); font-size: 2rem; font-weight: 300;
+    margin-bottom: .4rem; margin-top: .4rem;
+  }
+  .slot-time { font-size: .5rem; letter-spacing: .15em; text-transform: uppercase; color: var(--soft); margin-bottom: 1rem; }
+  .countdown-label { font-size: .4rem; letter-spacing: .2em; text-transform: uppercase; color: var(--soft); margin-bottom: .3rem; }
+  .countdown { font-size: 1.4rem; font-weight: 500; color: var(--amber); letter-spacing: .05em; }
+  .countdown.soon { color: var(--accent); }
+
+  /* ── STATS ROW ── */
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+  .stat-value { font-size: 2.2rem; font-weight: 300; color: var(--ink); line-height: 1; margin-bottom: .3rem; }
+  .stat-label { font-size: .4rem; letter-spacing: .2em; text-transform: uppercase; color: var(--soft); }
+  .stat-sub   { font-size: .45rem; color: var(--soft); margin-top: .2rem; }
+
+  /* ── QUEUE TABLE ── */
+  .queue-panel { grid-column: span 3; }
+  .queue-scroll { max-height: 420px; overflow-y: auto; }
+  .queue-scroll::-webkit-scrollbar { width: 4px; }
+  .queue-scroll::-webkit-scrollbar-track { background: transparent; }
+  .queue-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-size: .4rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--soft); text-align: left; padding: .5rem .8rem;
+    border-bottom: 1px solid var(--border); position: sticky; top: 0;
+    background: var(--panel);
+  }
+  td {
+    font-size: .6rem; padding: .65rem .8rem;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr.row-past td { opacity: 0.3; }
+  tr.row-now { background: rgba(200,80,58,0.08); }
+  tr.row-now td { color: var(--ink); }
+
+  .row-num { color: var(--soft); width: 2rem; }
+  .row-time { color: var(--soft); width: 5rem; white-space: nowrap; }
+  .row-artist { font-family: var(--serif); font-size: .82rem; font-style: italic; }
+  .row-event { color: var(--soft); font-size: .55rem; }
+  .row-year { color: var(--soft); width: 3rem; }
+  .row-dur { color: var(--soft); width: 4rem; text-align: right; }
+  .now-badge {
+    display: inline-block; font-size: .38rem; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--accent);
+    border: 1px solid var(--accent); padding: .15rem .4rem;
+    border-radius: 2px; margin-left: .5rem; vertical-align: middle;
+  }
+
+  /* ── LIBRARY HEALTH ── */
+  .health-row { display: flex; align-items: center; justify-content: space-between; padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .health-row:last-child { border-bottom: none; }
+  .health-label { font-size: .55rem; color: var(--soft); }
+  .health-val { font-size: .65rem; }
+  .health-ok { color: var(--green); }
+  .health-warn { color: var(--amber); }
+  .health-err { color: var(--accent); }
+
+  /* ── LOADING ── */
+  .loading-text { font-size: .55rem; letter-spacing: .2em; text-transform: uppercase; color: var(--soft); animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:.3;} 50%{opacity:1;} }
+
+  @media (max-width: 900px) {
+    .top-row { grid-template-columns: 1fr; }
+    .now-playing-panel { grid-column: span 1; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .queue-panel { grid-column: span 1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">Flora</div>
+    <div class="login-sub">Admin Console</div>
+    <label class="login-label">Access code</label>
+    <input class="login-input" type="password" id="pwInput" placeholder="Enter access code" onkeydown="if(event.key==='Enter')tryLogin()">
+    <button class="login-btn" onclick="tryLogin()">Enter</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <header>
+    <div>
+      <div class="header-logo">Flora</div>
+      <div class="header-label">Transmission Control</div>
+    </div>
+    <div class="header-right">
+      <div class="live-dot"></div>
+      <div class="live-text">Live</div>
+      <div id="clockDisplay" style="font-size:.55rem;letter-spacing:.1em;color:var(--soft);"></div>
+      <button class="logout-btn" onclick="logout()">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- TOP ROW -->
+    <div class="top-row">
+
+      <!-- NOW PLAYING -->
+      <div class="panel now-playing-panel">
+        <div class="panel-title">Now Playing <span class="badge" id="bucketBadge">—</span></div>
+        <div class="np-artist" id="npArtist"><span class="loading-text">Loading transmission</span></div>
+        <div class="np-title" id="npMixTitle"></div>
+        <div class="np-meta" id="npMeta"></div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-times">
+          <span id="posTime">0:00</span>
+          <span id="durTime">0:00</span>
+        </div>
+      </div>
+
+      <!-- SLOT STATUS -->
+      <div class="panel">
+        <div class="panel-title">Time Slot</div>
+        <div class="slot-time" id="slotTime">—</div>
+        <div class="slot-name" id="slotName">—</div>
+        <div class="countdown-label">Next transition in</div>
+        <div class="countdown" id="countdown">—</div>
+      </div>
+
+    </div>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="panel">
+        <div class="panel-title">Morning Drift</div>
+        <div class="stat-value" id="statMorning">—</div>
+        <div class="stat-label">Mixes in library</div>
+        <div class="stat-sub" id="statMorningWarn"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">The Ascent</div>
+        <div class="stat-value" id="statAfternoon">—</div>
+        <div class="stat-label">Mixes in library</div>
+        <div class="stat-sub" id="statAfternoonWarn"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">The Descent</div>
+        <div class="stat-value" id="statNight">—</div>
+        <div class="stat-label">Mixes in library</div>
+        <div class="stat-sub" id="statNightWarn"></div>
+      </div>
+    </div>
+
+    <!-- TODAY'S QUEUE -->
+    <div class="panel queue-panel">
+      <div class="panel-title">
+        Today's Queue
+        <span class="badge" id="queueBadge">—</span>
+      </div>
+      <div class="queue-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Time</th>
+              <th>Artist — Mix</th>
+              <th>Event</th>
+              <th>Year</th>
+              <th style="text-align:right">Duration</th>
+            </tr>
+          </thead>
+          <tbody id="queueBody">
+            <tr><td colspan="6"><span class="loading-text">Fetching queue...</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- LIBRARY HEALTH -->
+    <div class="panel" style="grid-column:span 3">
+      <div class="panel-title">Library Health</div>
+      <div id="healthPanel"><span class="loading-text">Checking...</span></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const ADMIN_PASSWORD = 'flora2025';  // Change this to your preferred password
+const BUCKETS = ['Morning', 'Afternoon', 'Late Night'];
+
+// ── AUTH ──
+function tryLogin() {
+  const val = document.getElementById('pwInput').value;
+  if (val === ADMIN_PASSWORD) {
+    sessionStorage.setItem('flora_admin', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    init();
+  } else {
+    document.getElementById('loginError').textContent = 'Incorrect access code';
+    document.getElementById('pwInput').value = '';
+    document.getElementById('pwInput').focus();
+  }
+}
+
+function logout() {
+  sessionStorage.removeItem('flora_admin');
+  location.reload();
+}
+
+// Auto-login if session exists
+if (sessionStorage.getItem('flora_admin')) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+}
+
+// ── HELPERS ──
+function seededRandom(seed) {
+  let s = seed;
+  return () => { s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; };
+}
+function getDailySeed() {
+  const d = new Date();
+  return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+}
+function shuffleWithSeed(arr, seed) {
+  const rng = seededRandom(seed), a = [...arr];
+  for (let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+function getCurrentBucket() {
+  const h = new Date().getHours();
+  if (h >= 7 && h < 12) return 'Morning';
+  if (h >= 2 && h < 7)  return 'Late Night';
+  return 'Afternoon';
+}
+
+function formatTime(secs) {
+  const m = Math.floor(secs/60), s = Math.floor(secs%60);
+  return m+':'+s.toString().padStart(2,'0');
+}
+
+function secsToWall(secs) {
+  const s = ((secs%86400)+86400)%86400;
+  const h = Math.floor(s/3600)%24, m = Math.floor((s%3600)/60);
+  const ampm = h<12?'AM':'PM', h12 = h%12||12;
+  return h12+':'+m.toString().padStart(2,'0')+' '+ampm;
+}
+
+// ── FETCH ──
+async function fetchBucket(bucket) {
+  try {
+    const res  = await fetch('/api/library?bucket='+encodeURIComponent(bucket));
+    const data = await res.json();
+    if (!data.records) return [];
+    return data.records.map(r => ({
+      url:      r.fields.SoundCloud_URL    || '',
+      title:    r.fields.Title             || 'Unknown Mix',
+      artist:   r.fields.Artist            || 'Unknown Artist',
+      year:     r.fields.Year              || '',
+      event:    r.fields.Event             || '',
+      duration: parseFloat(r.fields.Duration) || 0,
+    }));
+  } catch(e) { return []; }
+}
+
+// ── SYNC POSITION ──
+function getSyncPosition(tracks) {
+  const now = new Date(), midnight = new Date(now);
+  midnight.setHours(0,0,0,0);
+  const secondsToday = Math.floor((now-midnight)/1000);
+  const total = tracks.reduce((s,t)=>s+(t.duration*60),0);
+  if (!total) return {index:0, offsetSeconds:0};
+  const pos = secondsToday % total;
+  let elapsed = 0;
+  for (let i=0;i<tracks.length;i++) {
+    const dur = tracks[i].duration*60;
+    if (pos < elapsed+dur) return {index:i, offsetSeconds:Math.floor(pos-elapsed)};
+    elapsed += dur;
+  }
+  return {index:0, offsetSeconds:0};
+}
+
+// ── SLOT INFO ──
+const slotDefs = {
+  'Morning':    { name:'Morning Drift', time:'7AM – 12PM',  endH:12 },
+  'Afternoon':  { name:'The Ascent',    time:'12PM – 2AM',  endH:26 },
+  'Late Night': { name:'The Descent',   time:'2AM – 7AM',   endH:7  }
+};
+
+function getTimeToNextSlot() {
+  const now = new Date();
+  const h = now.getHours(), m = now.getMinutes(), s = now.getSeconds();
+  const bucket = getCurrentBucket();
+  let targetH;
+  if (bucket === 'Morning')    targetH = 12;
+  if (bucket === 'Afternoon')  targetH = 26; // 2AM next day
+  if (bucket === 'Late Night') targetH = 7;
+
+  let nowSecs = h*3600+m*60+s;
+  let targetSecs = targetH*3600;
+  if (targetH >= 24) targetSecs = (targetH-24)*3600 + 86400;
+  if (targetSecs < nowSecs) targetSecs += 86400;
+  return targetSecs - nowSecs;
+}
+
+// ── CLOCK ──
+function updateClock() {
+  const now = new Date();
+  const h = now.getHours()%12||12, m = now.getMinutes().toString().padStart(2,'0');
+  const s = now.getSeconds().toString().padStart(2,'0');
+  const ampm = now.getHours()<12?'AM':'PM';
+  document.getElementById('clockDisplay').textContent = h+':'+m+':'+s+' '+ampm;
+}
+
+// ── COUNTDOWN ──
+function updateCountdown() {
+  const secs = getTimeToNextSlot();
+  const h = Math.floor(secs/3600), m = Math.floor((secs%3600)/60), s = secs%60;
+  const str = h > 0
+    ? h+'h '+m+'m'
+    : m > 0 ? m+'m '+s+'s'
+    : s+'s';
+  const el = document.getElementById('countdown');
+  el.textContent = str;
+  el.className = 'countdown' + (secs < 600 ? ' soon' : '');
+}
+
+// ── SLOT DISPLAY ──
+function updateSlotDisplay() {
+  const bucket = getCurrentBucket();
+  const slot = slotDefs[bucket];
+  document.getElementById('slotName').textContent = slot.name;
+  document.getElementById('slotTime').textContent = slot.time;
+  document.getElementById('bucketBadge').textContent = slot.name;
+}
+
+// ── QUEUE BUILD ──
+let currentTracks = [];
+let currentIndex  = 0;
+let offsetSeconds = 0;
+
+async function buildQueue() {
+  const bucket = getCurrentBucket();
+  const raw    = await fetchBucket(bucket);
+  currentTracks = shuffleWithSeed(raw, getDailySeed());
+  const sync = getSyncPosition(currentTracks);
+  currentIndex  = sync.index;
+  offsetSeconds = sync.offsetSeconds;
+
+  // Now playing
+  if (currentTracks.length) {
+    const t = currentTracks[currentIndex];
+    document.getElementById('npArtist').textContent   = t.artist;
+    document.getElementById('npMixTitle').textContent = t.title;
+    document.getElementById('npMeta').textContent     = (t.event||'') + '  ·  ' + (t.year||'');
+    document.getElementById('durTime').textContent    = formatTime(t.duration*60);
+  }
+
+  // Build table
+  const slotInfo = slotDefs[bucket];
+  const slotStartSecs = { 'Morning':7*3600, 'Afternoon':12*3600, 'Late Night':2*3600 };
+  const slotStart = slotStartSecs[bucket];
+  let elapsed = 0;
+
+  const rows = currentTracks.map((t, i) => {
+    const wallSecs  = slotStart + elapsed;
+    const isCurrent = i === currentIndex;
+    const isPast    = i < currentIndex;
+    const durSecs   = t.duration * 60;
+    elapsed += durSecs;
+    return { t, i, wallSecs, isCurrent, isPast, durSecs };
+  });
+
+  document.getElementById('queueBadge').textContent = currentTracks.length + ' mixes';
+
+  const tbody = document.getElementById('queueBody');
+  tbody.innerHTML = rows.map(r => `
+    <tr class="${r.isCurrent ? 'row-now' : r.isPast ? 'row-past' : ''}">
+      <td class="row-num">${r.i+1}</td>
+      <td class="row-time">${secsToWall(r.wallSecs)}</td>
+      <td class="row-artist">
+        <a href="${r.t.url}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='transparent'">
+          ${r.t.artist} — ${r.t.title}
+        </a>
+        ${r.isCurrent ? '<span class="now-badge">NOW</span>' : ''}
+      </td>
+      <td class="row-event">${r.t.event||'—'}</td>
+      <td class="row-year">${r.t.year||'—'}</td>
+      <td class="row-dur">${r.t.duration ? formatTime(r.durSecs) : '—'}</td>
+    </tr>
+  `).join('');
+
+  // Scroll to current
+  setTimeout(() => {
+    const nowRow = tbody.querySelector('.row-now');
+    if (nowRow) nowRow.scrollIntoView({ behavior:'smooth', block:'center' });
+  }, 300);
+}
+
+// ── PROGRESS BAR ──
+function updateProgress() {
+  if (!currentTracks.length) return;
+  const t = currentTracks[currentIndex];
+  if (!t || !t.duration) return;
+  const now = new Date(), midnight = new Date(now);
+  midnight.setHours(0,0,0,0);
+  const secondsToday = Math.floor((now-midnight)/1000);
+  const total = currentTracks.reduce((s,tr)=>s+(tr.duration*60),0);
+  const pos = secondsToday % total;
+  let elapsed = 0;
+  for (let i=0;i<currentIndex;i++) elapsed += currentTracks[i].duration*60;
+  const trackPos = pos - elapsed;
+  const dur = t.duration * 60;
+  const pct = Math.min(100, (trackPos/dur)*100);
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('posTime').textContent = formatTime(trackPos);
+}
+
+// ── LIBRARY STATS ──
+async function buildLibraryStats() {
+  const results = await Promise.all(BUCKETS.map(b => fetchBucket(b)));
+  const [morning, afternoon, night] = results;
+
+  const ids = { 'Morning':'statMorning', 'Afternoon':'statAfternoon', 'Late Night':'statNight' };
+  const warnIds = { 'Morning':'statMorningWarn', 'Afternoon':'statAfternoonWarn', 'Late Night':'statNightWarn' };
+  const data = { 'Morning':morning, 'Afternoon':afternoon, 'Late Night':night };
+
+  BUCKETS.forEach((b, i) => {
+    const tracks = data[b];
+    const el = document.getElementById(ids[b]);
+    const warnEl = document.getElementById(warnIds[b]);
+    el.textContent = tracks.length;
+
+    const missingDur = tracks.filter(t => !t.duration).length;
+    const missingUrl = tracks.filter(t => !t.url).length;
+
+    if (missingUrl > 0) {
+      warnEl.innerHTML = `<span class="health-err">⚠ ${missingUrl} missing URL</span>`;
+    } else if (missingDur > 0) {
+      warnEl.innerHTML = `<span class="health-warn">⚠ ${missingDur} missing duration</span>`;
+    } else if (tracks.length < 10) {
+      warnEl.innerHTML = `<span class="health-warn">Low — add more mixes</span>`;
+    } else {
+      warnEl.innerHTML = `<span class="health-ok">✓ Healthy</span>`;
+    }
+  });
+
+  // Health panel
+  const allTracks = [...morning, ...afternoon, ...night];
+  const missingDur = allTracks.filter(t => !t.duration).length;
+  const missingUrl = allTracks.filter(t => !t.url).length;
+  const total = allTracks.length;
+
+  document.getElementById('healthPanel').innerHTML = `
+    <div class="health-row">
+      <span class="health-label">Total mixes in library</span>
+      <span class="health-val ${total>30?'health-ok':'health-warn'}">${total}</span>
+    </div>
+    <div class="health-row">
+      <span class="health-label">Missing SoundCloud URL</span>
+      <span class="health-val ${missingUrl===0?'health-ok':'health-err'}">${missingUrl===0?'None':'⚠ '+missingUrl+' tracks'}</span>
+    </div>
+    <div class="health-row">
+      <span class="health-label">Missing duration field</span>
+      <span class="health-val ${missingDur===0?'health-ok':'health-warn'}">${missingDur===0?'None':'⚠ '+missingDur+' tracks (breaks sync)'}</span>
+    </div>
+    <div class="health-row">
+      <span class="health-label">Daily seed (today's shuffle)</span>
+      <span class="health-val">${getDailySeed()}</span>
+    </div>
+    <div class="health-row">
+      <span class="health-label">Current sync position</span>
+      <span class="health-val">Track ${currentIndex+1} of ${currentTracks.length} · ${formatTime(offsetSeconds)} offset</span>
+    </div>
+  `;
+}
+
+// ── INIT ──
+async function init() {
+  updateClock();
+  updateSlotDisplay();
+  updateCountdown();
+  await buildQueue();
+  await buildLibraryStats();
+  updateProgress();
+
+  // Update clock every second
+  setInterval(() => {
+    updateClock();
+    updateCountdown();
+    updateProgress();
+  }, 1000);
+
+  // Refresh queue every 2 minutes
+  setInterval(buildQueue, 120000);
+
+  // Refresh library stats every 5 minutes
+  setInterval(buildLibraryStats, 300000);
+}
+
+// Auto-init if already logged in
+if (sessionStorage.getItem('flora_admin')) init();
+</script>
+</body>
+</html>
