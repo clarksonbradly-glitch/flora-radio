@@ -503,6 +503,10 @@
 </div>
 
 <iframe id="sc-frame" allow="autoplay" scrolling="no" frameborder="no"></iframe>
+<!-- Silent audio element to claim iOS lock screen media session -->
+<audio id="silent-audio" loop style="display:none">
+  <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav">
+</audio>
 
 <!-- SLOT POPUPS -->
 <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
@@ -915,11 +919,47 @@ function initWidget(track, offsetSecs, autoplay) {
   }
 }
 
+// ─────────────────────────────────────────────
+// MEDIA SESSION — iOS/Android lock screen branding
+// ─────────────────────────────────────────────
+var silentAudio = document.getElementById('silent-audio');
+
+function updateMediaSession(track) {
+  if (!('mediaSession' in navigator)) return;
+
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title:  track.title  || 'Flora Radio',
+    artist: track.artist || 'Flora Radio',
+    album:  'Flora Radio — Continuous Electronic Music Transmission',
+    artwork: [
+      { src: 'https://floraradio.com/icon.svg', sizes: '512x512', type: 'image/svg+xml' }
+    ]
+  });
+
+  // Handle lock screen controls
+  navigator.mediaSession.setActionHandler('play', function() {
+    if (widget) widget.play();
+    if (silentAudio) silentAudio.play();
+    setAppState('playing');
+    runEQ(); scheduleCallouts();
+  });
+  navigator.mediaSession.setActionHandler('pause', function() {
+    if (widget) widget.pause();
+    if (silentAudio) silentAudio.pause();
+    setAppState('paused');
+  });
+  navigator.mediaSession.setActionHandler('nexttrack', function() {
+    currentIndex = (currentIndex + 1) % tracks.length;
+    initWidget(tracks[currentIndex], 0, true);
+  });
+}
+
 function updateNowPlaying(track, offsetSecs) {
   if (!track) return;
   document.getElementById('nowPlaying').classList.add('visible');
   document.getElementById('npTitle').textContent = track.artist+' — '+track.title;
   document.getElementById('npMeta').textContent  = (track.event||'')+' · '+(track.year||'');
+  updateMediaSession(track);
   var scLink = document.getElementById('npScLink');
   if (scLink) {
     if (track.artistSC && track.artistSC !== '#' && track.artistSC !== '') {
@@ -1005,6 +1045,8 @@ function setAppState(state) {
     clearTimeout(eqTimer);
     clearInterval(identTimer);
     clearInterval(slotMonitorTimer);
+    if (silentAudio) silentAudio.pause();
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
     bars.forEach(function(b) { b.style.height = '3px'; });
     window.speechSynthesis.cancel();
     isSpeaking = false;
