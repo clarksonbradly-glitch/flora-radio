@@ -8,6 +8,13 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Flora">
 <meta name="theme-color" content="#0e0c0a">
+<meta name="description" content="Flora Radio — continuous electronic music transmission. Deep house, techno and electronic music streaming 24/7.">
+<meta property="og:title" content="Flora Radio">
+<meta property="og:description" content="Continuous electronic music transmission. Deep house, techno and electronic music streaming 24/7.">
+<meta property="og:url" content="https://floraradio.com">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://floraradio.com/icon.svg">
+<link rel="shortcut icon" href="/icon.svg" type="image/svg+xml">
 <title>Flora</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
@@ -743,6 +750,36 @@ function stationIdent(cb){
     { text: 'Continuous electronic music transmission.',     pause: 0   }
   ], cb);
 }
+
+// Track which bucket we're currently in
+var lastBucket = getCurrentBucket();
+
+// Transition announcements between time slots
+function speakTransition(bucket, cb) {
+  var scripts = {
+    'Morning': [
+      { text: 'Flora Radio.',                              pause: 340 },
+      { text: 'A new day begins.',                         pause: 300 },
+      { text: 'You are now entering Morning Drift.',       pause: 320 },
+      { text: 'Warm, unhurried, and deep.',                pause: 0   }
+    ],
+    'Afternoon': [
+      { text: 'Flora Radio.',                              pause: 340 },
+      { text: 'The energy is building.',                   pause: 280 },
+      { text: 'You are now entering The Ascent.',          pause: 320 },
+      { text: 'Peak time house and techno.',               pause: 240 },
+      { text: 'For the hours ahead.',                      pause: 0   }
+    ],
+    'Late Night': [
+      { text: 'Flora Radio.',                              pause: 340 },
+      { text: 'You are now entering The Descent.',         pause: 320 },
+      { text: 'Minimal, dark, and hypnotic.',              pause: 260 },
+      { text: 'Music for the deep hours.',                 pause: 0   }
+    ]
+  };
+  var chunks = scripts[bucket] || scripts['Afternoon'];
+  speak(chunks, cb);
+}
 function scheduleCallouts(){clearInterval(identTimer);identTimer=setInterval(()=>{if(playing)artistCallout();},IDENT_MS);}
 
 // ─────────────────────────────────────────────
@@ -778,14 +815,65 @@ function initWidget(track, offsetSecs, autoplay) {
   });
   widget.bind(SC.Widget.Events.FINISH, function() {
     widgetReady = false;
-    currentIndex = (currentIndex+1)%tracks.length;
-    stationIdent(function(){initWidget(tracks[currentIndex],0,true);});
+    var newBucket = getCurrentBucket();
+
+    if (newBucket !== lastBucket) {
+      // ── BUCKET TRANSITION ──
+      // Time slot has changed — fetch new bucket, announce, apply theme
+      lastBucket = newBucket;
+      speakTransition(newBucket, function() {
+        // Reset library so it fetches the new bucket
+        tracks = []; libraryLoaded = false; _fetchPromise = null;
+        fetchLibrary().then(function(ok) {
+          if (!ok || !tracks.length) return;
+          applyTheme(newBucket);
+          highlightSlot();
+          currentIndex = 0;
+          initWidget(tracks[currentIndex], 0, true);
+        });
+      });
+    } else {
+      // Same bucket — move to next track seamlessly
+      currentIndex = (currentIndex+1) % tracks.length;
+      // Reset any stuck speech state before transitioning
+      isSpeaking = false;
+      window.speechSynthesis.cancel();
+      initWidget(tracks[currentIndex], 0, true);
+    }
   });
   widget.bind(SC.Widget.Events.ERROR, function() {
     widgetReady = false;
+    console.warn('Flora: track error, skipping to next');
     currentIndex = (currentIndex+1)%tracks.length;
     initWidget(tracks[currentIndex],0,true);
   });
+
+  // Watchdog: detect if audio stops without FINISH firing
+  // Checks every 30 seconds — if playing but position hasn't moved, skip
+  var lastPosition = 0;
+  var stuckCount   = 0;
+  if (autoplay) {
+    var watchdog = setInterval(function() {
+      if (!playing || !widget) { clearInterval(watchdog); return; }
+      widget.getPosition(function(pos) {
+        if (Math.abs(pos - lastPosition) < 1000 && playing) {
+          stuckCount++;
+          if (stuckCount >= 2) {
+            // Position hasn't moved in 60 seconds while playing — skip
+            console.warn('Flora: watchdog detected stuck track, skipping');
+            clearInterval(watchdog);
+            currentIndex = (currentIndex+1) % tracks.length;
+            isSpeaking = false;
+            window.speechSynthesis.cancel();
+            initWidget(tracks[currentIndex], 0, true);
+          }
+        } else {
+          stuckCount = 0;
+        }
+        lastPosition = pos;
+      });
+    }, 30000);
+  }
 }
 
 function updateNowPlaying(track, offsetSecs) {
