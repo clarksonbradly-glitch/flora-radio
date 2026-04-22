@@ -810,7 +810,7 @@ function startSlotMonitor() {
             highlightSlot();
             currentIndex = 0;
             setVol(100);
-            initWidget(tracks[currentIndex], 0, true);
+            loadTrack(tracks[currentIndex], 0, true);
           });
         });
       });
@@ -819,100 +819,119 @@ function startSlotMonitor() {
 }
 
 // ─────────────────────────────────────────────
-// SOUNDCLOUD WIDGET
+// SOUNDCLOUD WIDGET — CLOCK-DRIVEN ENGINE
+//
+// Core principle: the clock is the source of truth.
+// Every 30 seconds Flora checks what SHOULD be playing
+// based on wall clock time, and reloads if needed.
+// No reliance on FINISH events. No stuck tracks.
 // ─────────────────────────────────────────────
-let widget=null,playing=false,eqTimer=null;
+let widget = null, playing = false, eqTimer = null;
+let loadedTrackUrl = null;  // URL of currently loaded track
+let syncCheckTimer = null;  // 30-second clock sync timer
+
 const btn  = document.getElementById('playBtn');
 const eq   = document.getElementById('eq');
 const np   = document.getElementById('nowPlaying');
 const bars = document.querySelectorAll('.eq-bar');
 
-function initWidget(track, offsetSecs, autoplay) {
+// Load a track into the iframe
+// autoplay=true: baked into iframe URL for reliability
+// autoplay=false: silent pre-load for first tap
+function loadTrack(track, offsetSecs, autoplay) {
   widgetReady = false;
+  loadedTrackUrl = track.url;
   const frame = document.getElementById('sc-frame');
-  // For mid-session transitions use auto_play=true in the iframe URL
-  // This is more reliable than calling widget.play() programmatically
-  // since the audio context is already unlocked from the original user tap
-  var autoPlayParam = autoplay ? 'true' : 'false';
-  frame.src = 'https://w.soundcloud.com/player/?url='+encodeURIComponent(track.url)+
-    '&auto_play='+autoPlayParam+'&buying=false&liking=false&download=false&sharing=false'+
-    '&show_artwork=false&show_comments=false&show_playcount=false'+
+  frame.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(track.url) +
+    '&auto_play=' + (autoplay ? 'true' : 'false') +
+    '&buying=false&liking=false&download=false&sharing=false' +
+    '&show_artwork=false&show_comments=false&show_playcount=false' +
     '&show_user=false&hide_related=true&visual=false&color=%23c8503a';
   widget = SC.Widget(frame);
   widget.bind(SC.Widget.Events.READY, function() {
     if (offsetSecs > 0) widget.seekTo(offsetSecs * 1000);
     updateNowPlaying(track, offsetSecs);
     widgetReady = true;
-
     if (autoplay) {
-      // auto_play=true already set in iframe — just update app state
       setAppState('playing');
     } else {
-      // First load — wait for user tap
       setAppState('ready');
     }
   });
+
+  // FINISH event — fast path for instant track transition
+  // If this fires, great — immediate transition, no gap.
+  // If it doesn't fire, the 30-second clock sync catches it.
   widget.bind(SC.Widget.Events.FINISH, function() {
-    widgetReady = false;
-    var newBucket = getCurrentBucket();
-
-    if (newBucket !== lastBucket) {
-      // ── BUCKET TRANSITION ──
-      // Time slot has changed — fetch new bucket, announce, apply theme
-      lastBucket = newBucket;
-      speakTransition(newBucket, function() {
-        // Reset library so it fetches the new bucket
-        tracks = []; libraryLoaded = false; _fetchPromise = null;
-        fetchLibrary().then(function(ok) {
-          if (!ok || !tracks.length) return;
-          applyTheme(newBucket);
-          highlightSlot();
-          currentIndex = 0;
-          initWidget(tracks[currentIndex], 0, true);
-        });
-      });
-    } else {
-      // Same bucket — move to next track seamlessly
-      currentIndex = (currentIndex+1) % tracks.length;
-      // Reset any stuck speech state before transitioning
-      isSpeaking = false;
-      window.speechSynthesis.cancel();
-      initWidget(tracks[currentIndex], 0, true);
-    }
+    if (!playing) return;
+    console.log('Flora: FINISH event fired — advancing track');
+    isSpeaking = false;
+    window.speechSynthesis.cancel();
+    // Recalculate sync position — clock may have moved since track started
+    var sync = getSyncPosition(tracks);
+    currentIndex = sync.index;
+    loadedTrackUrl = null; // force reload
+    loadTrack(tracks[currentIndex], sync.offsetSeconds, true);
   });
+
+  // ERROR event — skip to next immediately
   widget.bind(SC.Widget.Events.ERROR, function() {
-    widgetReady = false;
-    console.warn('Flora: track error, skipping to next');
-    currentIndex = (currentIndex+1)%tracks.length;
-    initWidget(tracks[currentIndex],0,true);
+    if (!playing) return;
+    console.warn('Flora: track error, clock-syncing to next');
+    loadedTrackUrl = null;
+    var sync = getSyncPosition(tracks);
+    currentIndex = sync.index;
+    loadTrack(tracks[currentIndex], sync.offsetSeconds, true);
   });
+}
 
-  // Watchdog: detect if audio stops without FINISH firing
-  // Checks every 30 seconds — if playing but position hasn't moved, skip
-  var lastPosition = 0;
-  var stuckCount   = 0;
-  if (autoplay) {
-    var watchdog = setInterval(function() {
-      if (!playing || !widget) { clearInterval(watchdog); return; }
-      widget.getPosition(function(pos) {
-        if (Math.abs(pos - lastPosition) < 1000 && playing) {
-          stuckCount++;
-          if (stuckCount >= 2) {
-            // Position hasn't moved in 60 seconds while playing — skip
-            console.warn('Flora: watchdog detected stuck track, skipping');
-            clearInterval(watchdog);
-            currentIndex = (currentIndex+1) % tracks.length;
-            isSpeaking = false;
-            window.speechSynthesis.cancel();
-            initWidget(tracks[currentIndex], 0, true);
-          }
-        } else {
-          stuckCount = 0;
-        }
-        lastPosition = pos;
+// ── CLOCK SYNC CHECK ──
+// Called every 30 seconds while playing.
+// Calculates what should be playing right now from the clock,
+// compares to what is loaded, reloads if they differ.
+function clockSyncCheck() {
+  if (!playing || !libraryLoaded || !tracks.length) return;
+
+  // Check for bucket change first
+  var nowBucket = getCurrentBucket();
+  if (nowBucket !== lastBucket) {
+    console.log('Flora clock: bucket changed', lastBucket, '->', nowBucket);
+    lastBucket = nowBucket;
+    isSpeaking = false;
+    window.speechSynthesis.cancel();
+    speakTransition(nowBucket, function() {
+      tracks = []; libraryLoaded = false; _fetchPromise = null;
+      fetchLibrary().then(function(ok) {
+        if (!ok || !tracks.length) return;
+        applyTheme(nowBucket);
+        highlightSlot();
+        var sync = getSyncPosition(tracks);
+        currentIndex = sync.index;
+        loadTrack(tracks[currentIndex], sync.offsetSeconds, true);
       });
-    }, 30000);
+    });
+    return;
   }
+
+  // Same bucket — check if right track is loaded
+  var sync = getSyncPosition(tracks);
+  if (tracks[sync.index] && tracks[sync.index].url !== loadedTrackUrl) {
+    // Clock says different track should be playing — reload
+    console.log('Flora clock: resyncing to track', sync.index);
+    currentIndex = sync.index;
+    isSpeaking = false;
+    window.speechSynthesis.cancel();
+    loadTrack(tracks[currentIndex], sync.offsetSeconds, true);
+  }
+}
+
+function startSyncTimer() {
+  clearInterval(syncCheckTimer);
+  syncCheckTimer = setInterval(clockSyncCheck, 30000);
+}
+
+function stopSyncTimer() {
+  clearInterval(syncCheckTimer);
 }
 
 
@@ -992,11 +1011,13 @@ function setAppState(state) {
     btn.classList.remove('loading','tuning');
     btn.classList.add('playing');
     eq.classList.add('active');
-    // Fade out "Tap to listen" once music starts
     if (hintEl) hintEl.classList.remove('visible');
     if (enteringEl) enteringEl.classList.remove('visible');
     np.classList.add('visible');
-    startSlotMonitor();
+    startSyncTimer();    // clock-driven sync
+    startSlotMonitor();  // slot boundary check
+    runEQ();
+    scheduleCallouts();
   }
 
   if (state === 'paused') {
@@ -1006,6 +1027,7 @@ function setAppState(state) {
     clearTimeout(eqTimer);
     clearInterval(identTimer);
     clearInterval(slotMonitorTimer);
+    stopSyncTimer();
     bars.forEach(function(b) { b.style.height = '3px'; });
     window.speechSynthesis.cancel();
     isSpeaking = false;
@@ -1028,9 +1050,7 @@ function togglePlay() {
   if (appState === 'ready' || appState === 'paused') {
     if (widget) {
       widget.play();
-      setAppState('playing');
-      runEQ();
-      scheduleCallouts();
+      setAppState('playing'); // starts sync timer, EQ, callouts
     }
     return;
   }
@@ -1038,7 +1058,7 @@ function togglePlay() {
   // Playing — pause
   if (appState === 'playing') {
     if (widget) widget.pause();
-    setAppState('paused');
+    setAppState('paused'); // stops sync timer
     return;
   }
 }
@@ -1210,7 +1230,7 @@ highlightSlot();
       return;
     }
     // Silently load widget — setAppState('ready') fires when SC.Widget READY event fires
-    initWidget(tracks[currentIndex], startOffset, false);
+    loadTrack(tracks[currentIndex], startOffset, false);
   }).catch(function() {
     var el = document.getElementById('transmissionLabel');
     if (el) el.textContent = 'Connection error — refresh to retry';
