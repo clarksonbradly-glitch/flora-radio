@@ -487,7 +487,8 @@ async function buildQueue() {
   let elapsed = 0;
 
   const rows = currentTracks.map((t, i) => {
-    const wallSecs  = slotStart + elapsed;
+    // Wrap wall clock correctly — handles midnight crossover
+    const wallSecs  = (slotStart + elapsed) % 86400;
     const isCurrent = i === currentIndex;
     const isPast    = i < currentIndex;
     const durSecs   = t.duration * 60;
