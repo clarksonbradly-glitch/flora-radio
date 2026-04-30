@@ -789,58 +789,142 @@ function scheduleCallouts(){clearInterval(identTimer);identTimer=setInterval(()=
 // ─────────────────────────────────────────────
 var slotMonitorTimer = null;
 
-var transitioning = false; // prevent double-transitions
+var transitioning = false;
+var boundaryTimer  = null;
 
-function startSlotMonitor() {
-  clearInterval(slotMonitorTimer);
-  slotMonitorTimer = setInterval(function() {
-    if (!playing || transitioning) return;
+// ─────────────────────────────────────────────
+// PRECISE BOUNDARY SCHEDULER
+// Calculates exact ms until next slot boundary
+// and sets a single setTimeout to fire then.
+// Cannot miss. Cannot double-fire.
+// ─────────────────────────────────────────────
+
+function getMsUntilNextBoundary() {
+  var now   = new Date();
+  var h     = now.getHours();
+  var m     = now.getMinutes();
+  var s     = now.getSeconds();
+  var ms    = now.getMilliseconds();
+  var nowMs = ((h * 3600) + (m * 60) + s) * 1000 + ms;
+
+  // Boundaries in ms from midnight
+  var boundaries = [
+    7  * 3600 * 1000,   // 7AM  — Morning Drift starts
+    12 * 3600 * 1000,   // 12PM — The Ascent starts
+    26 * 3600 * 1000    // 2AM  — The Descent starts (next day)
+  ];
+
+  // Find next boundary after now
+  var dayMs = 24 * 3600 * 1000;
+  var next  = null;
+
+  for (var i = 0; i < boundaries.length; i++) {
+    var b = boundaries[i] % dayMs; // wrap 26h -> 2AM
+    var diff = b - nowMs;
+    if (diff < 0) diff += dayMs;   // already passed today — fire tomorrow
+    if (next === null || diff < next) next = diff;
+  }
+
+  return next;
+}
+
+function scheduleBoundaryTransition() {
+  clearTimeout(boundaryTimer);
+  var msUntil = getMsUntilNextBoundary();
+  console.log('Flora: next boundary in', Math.round(msUntil/1000/60), 'minutes');
+
+  boundaryTimer = setTimeout(function() {
+    if (!playing) {
+      // Not playing — still reschedule for the next boundary
+      scheduleBoundaryTransition();
+      return;
+    }
+
     var newBucket = getCurrentBucket();
-    if (newBucket === lastBucket) return;
+    console.log('Flora: boundary timer fired — transitioning to', newBucket);
 
-    console.log('Flora: slot boundary crossed —', lastBucket, '->', newBucket);
     transitioning = true;
-    lastBucket = newBucket; // lock in immediately so monitor doesn't re-fire
+    lastBucket    = newBucket;
 
-    // Cancel any stuck speech immediately
+    // Cancel any speech or idents immediately
     isSpeaking = false;
     window.speechSynthesis.cancel();
     clearInterval(identTimer);
+    stopSyncTimer();
 
-    // Fade out
-    ramp(100, 0, 2000, function() {
+    // 30 second fade out — long enough to feel intentional
+    ramp(100, 0, 30000, function() {
       if (widget) widget.pause();
 
-      // Apply theme right away so visual updates immediately
+      // Update theme visually
       applyTheme(newBucket);
       highlightSlot();
 
-      // Speak transition — force isSpeaking false first so it doesn't bail
-      isSpeaking = false;
-      speakTransition(newBucket, function() {
-        // Reset library and fetch new bucket
+      // Play recorded transition audio if available,
+      // otherwise fall back to speech synthesis
+      playTransitionAudio(newBucket, function() {
+        // Reset and fetch new bucket
         tracks = []; libraryLoaded = false; _fetchPromise = null;
         fetchLibrary().then(function(ok) {
           transitioning = false;
+          setVol(100);
           if (!ok || !tracks.length) {
-            console.warn('Flora: no tracks found for new bucket', newBucket);
-            setVol(100);
+            console.warn('Flora: no tracks for', newBucket);
+            scheduleBoundaryTransition();
             return;
           }
-          currentIndex = 0;
+          currentIndex  = 0;
           loadedTrackUrl = null;
-          setVol(100);
           loadTrack(tracks[currentIndex], 0, true);
-          scheduleCallouts(); // restart ident timer for new slot
+          scheduleCallouts();
+          startSyncTimer();
+          // Schedule the NEXT boundary after this one
+          scheduleBoundaryTransition();
         }).catch(function() {
           transitioning = false;
           setVol(100);
+          scheduleBoundaryTransition();
         });
       });
     });
 
-  }, 30000); // check every 30 seconds (was 60 — faster detection)
+  }, msUntil);
 }
+
+// ─────────────────────────────────────────────
+// TRANSITION AUDIO
+// Uses recorded MP3 if available in /audio/
+// Falls back to speech synthesis if not
+// ─────────────────────────────────────────────
+// Universal transition audio bed — plays across all slot changes
+var TRANSITION_AUDIO = '/audio/floraradio-pulse.mp3';
+
+function playTransitionAudio(bucket, onDone) {
+  var audio = new Audio(TRANSITION_AUDIO);
+
+  audio.oncanplaythrough = function() {
+    audio.play().then(function() {
+      audio.onended = function() {
+        if (onDone) onDone();
+      };
+    }).catch(function() {
+      console.log('Flora: pulse audio unavailable, using speech');
+      isSpeaking = false;
+      speakTransition(bucket, onDone);
+    });
+  };
+
+  audio.onerror = function() {
+    console.log('Flora: floraradio-pulse.mp3 not found — using speech');
+    isSpeaking = false;
+    speakTransition(bucket, onDone);
+  };
+
+  audio.load();
+}
+
+// Keep startSlotMonitor as a no-op stub so nothing breaks
+function startSlotMonitor() {}
 
 // ─────────────────────────────────────────────
 // SOUNDCLOUD WIDGET — CLOCK-DRIVEN ENGINE
@@ -914,33 +998,12 @@ function loadTrack(track, offsetSecs, autoplay) {
 // Calculates what should be playing right now from the clock,
 // compares to what is loaded, reloads if they differ.
 function clockSyncCheck() {
+  // Only handles within-bucket sync
+  // Bucket transitions are handled by scheduleBoundaryTransition()
   if (!playing || !libraryLoaded || !tracks.length || transitioning) return;
 
-  // Check for bucket change first
-  var nowBucket = getCurrentBucket();
-  if (nowBucket !== lastBucket) {
-    console.log('Flora clock: bucket changed', lastBucket, '->', nowBucket);
-    lastBucket = nowBucket;
-    isSpeaking = false;
-    window.speechSynthesis.cancel();
-    speakTransition(nowBucket, function() {
-      tracks = []; libraryLoaded = false; _fetchPromise = null;
-      fetchLibrary().then(function(ok) {
-        if (!ok || !tracks.length) return;
-        applyTheme(nowBucket);
-        highlightSlot();
-        var sync = getSyncPosition(tracks);
-        currentIndex = sync.index;
-        loadTrack(tracks[currentIndex], sync.offsetSeconds, true);
-      });
-    });
-    return;
-  }
-
-  // Same bucket — check if right track is loaded
   var sync = getSyncPosition(tracks);
   if (tracks[sync.index] && tracks[sync.index].url !== loadedTrackUrl) {
-    // Clock says different track should be playing — reload
     console.log('Flora clock: resyncing to track', sync.index);
     currentIndex = sync.index;
     isSpeaking = false;
