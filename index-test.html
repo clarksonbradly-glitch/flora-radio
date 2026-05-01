@@ -889,16 +889,6 @@ function scheduleBoundaryTransition() {
 
   _boundaryMs  = msUntil;
   _boundarySet = Date.now();
-  // Update pink countdown display every second
-  var countdownInterval = setInterval(function() {
-    var remaining = getMsUntilNextBoundary();
-    var mins = Math.floor(remaining / 60000);
-    var secs = Math.floor((remaining % 60000) / 1000);
-    var el = document.getElementById('countdownDisplay');
-    if (el) el.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
-    if (remaining <= 0) clearInterval(countdownInterval);
-  }, 1000);
-
   boundaryTimer = setTimeout(function() {
     if (!playing) {
       // Not playing — still reschedule for the next boundary
