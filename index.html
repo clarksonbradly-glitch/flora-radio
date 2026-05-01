@@ -828,6 +828,36 @@ function getMsUntilNextBoundary() {
   return next;
 }
 
+function doTransition(newBucket) {
+  // Update theme visually
+  applyTheme(newBucket);
+  highlightSlot();
+
+  // Play transition audio then load new bucket
+  playTransitionAudio(newBucket, function() {
+    tracks = []; libraryLoaded = false; _fetchPromise = null;
+    fetchLibrary().then(function(ok) {
+      transitioning = false;
+      setVol(100);
+      if (!ok || !tracks.length) {
+        console.warn('Flora: no tracks for', newBucket);
+        scheduleBoundaryTransition();
+        return;
+      }
+      currentIndex   = 0;
+      loadedTrackUrl = null;
+      loadTrack(tracks[currentIndex], 0, true);
+      scheduleCallouts();
+      startSyncTimer();
+      scheduleBoundaryTransition();
+    }).catch(function() {
+      transitioning = false;
+      setVol(100);
+      scheduleBoundaryTransition();
+    });
+  });
+}
+
 function scheduleBoundaryTransition() {
   clearTimeout(boundaryTimer);
   var msUntil = getMsUntilNextBoundary();
@@ -852,41 +882,19 @@ function scheduleBoundaryTransition() {
     clearInterval(identTimer);
     stopSyncTimer();
 
-    // 30 second fade out — long enough to feel intentional
-    ramp(100, 0, 30000, function() {
+    // Fade out over 8 seconds — short enough to be reliable
+    ramp(100, 0, 8000, function() {
       if (widget) widget.pause();
-
-      // Update theme visually
-      applyTheme(newBucket);
-      highlightSlot();
-
-      // Play recorded transition audio if available,
-      // otherwise fall back to speech synthesis
-      playTransitionAudio(newBucket, function() {
-        // Reset and fetch new bucket
-        tracks = []; libraryLoaded = false; _fetchPromise = null;
-        fetchLibrary().then(function(ok) {
-          transitioning = false;
-          setVol(100);
-          if (!ok || !tracks.length) {
-            console.warn('Flora: no tracks for', newBucket);
-            scheduleBoundaryTransition();
-            return;
-          }
-          currentIndex  = 0;
-          loadedTrackUrl = null;
-          loadTrack(tracks[currentIndex], 0, true);
-          scheduleCallouts();
-          startSyncTimer();
-          // Schedule the NEXT boundary after this one
-          scheduleBoundaryTransition();
-        }).catch(function() {
-          transitioning = false;
-          setVol(100);
-          scheduleBoundaryTransition();
-        });
-      });
+      doTransition(newBucket);
     });
+
+    // Safety net — if ramp fails for any reason, force transition after 12 seconds
+    setTimeout(function() {
+      if (!transitioning) return; // already completed
+      if (widget) widget.pause();
+      setVol(0);
+      doTransition(newBucket);
+    }, 12000);
 
   }, msUntil);
 }
