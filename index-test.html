@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Flora">
+<meta name="theme-color" content="#0e0c0a">
+<meta name="description" content="Flora Radio — continuous electronic music transmission. Deep house, techno and electronic music streaming 24/7.">
+<meta property="og:title" content="Flora Radio">
+<meta property="og:description" content="Continuous electronic music transmission. Deep house, techno and electronic music streaming 24/7.">
+<meta property="og:url" content="https://floraradio.com">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://floraradio.com/icon.svg">
+<link rel="shortcut icon" href="/icon.svg" type="image/svg+xml">
+<title>Flora</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon.svg">
+<script defer src="/_vercel/insights/script.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f2ec; --ink: #111010; --accent: #c8503a; --border: rgba(17,16,16,0.15);
+  }
+
+  body.theme-morning {
+    --bg: #f0e8d8; --ink: #1a1208; --accent: #c8712a; --border: rgba(60,40,10,0.2);
+    background: var(--bg);
+  }
+  body.theme-morning::after {
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 110%, rgba(220,160,60,0.25) 0%, transparent 70%),
+                radial-gradient(ellipse at 20% 80%, rgba(200,120,40,0.12) 0%, transparent 50%);
+  }
+  body.theme-ascent {
+    --bg: #0e0c0a; --ink: #f0ece4; --accent: #e05a3a; --border: rgba(240,236,228,0.15);
+    background: var(--bg);
+  }
+  body.theme-ascent::after {
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,80,40,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 100%, rgba(180,60,20,0.1) 0%, transparent 50%);
+  }
+  body.theme-descent {
+    --bg: #080c14; --ink: #e8eaf0; --accent: #6070c8; --border: rgba(232,234,240,0.12);
+    background: var(--bg);
+  }
+  body.theme-descent::after {
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 30% 20%, rgba(80,90,180,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 80%, rgba(40,50,120,0.12) 0%, transparent 50%);
+  }
+
+  html, body { height: 100%; color: var(--ink); font-family: 'Cormorant Garamond', Georgia, serif; transition: background 1.2s ease; }
+
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+    opacity: 0.5;
+  }
+
+  /* ── PAGE ── */
+  .page {
+    position: relative; z-index: 2;
+    height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: 13vh 2rem 7vh; text-align: center;
+  }
+
+  /* ── BRAND ── */
+  .brand { display:flex; flex-direction:column; align-items:center; gap:0.85rem; animation:rise 1.4s ease both; }
+  .logo { display:flex; align-items:center; justify-content:center; font-size:clamp(3rem,10.5vw,5.2rem); font-weight:300; text-transform:uppercase; color:var(--ink); line-height:1; transition:color 1.2s ease; }
+  .ll { display:inline-block; margin-right:0.38em; }
+  .ll:last-child { margin-right:0; }
+  .logo-o { display:inline-flex; align-items:center; justify-content:center; width:0.72em; height:0.72em; margin-right:0.38em; position:relative; top:0.04em; flex-shrink:0; }
+  .logo-o svg { width:100%; height:100%; overflow:visible; }
+  .s1,.s2,.s3,.s4 { fill:none; stroke:var(--accent); stroke-linecap:round; stroke-linejoin:round; transition:stroke 1.2s ease; }
+  .s1 { stroke-width:3.5; stroke-dasharray:290; stroke-dashoffset:290; animation:draw 1s cubic-bezier(.4,0,.2,1) .4s forwards; }
+  .s2 { stroke-width:1.8; stroke-dasharray:310; stroke-dashoffset:310; animation:draw 1.1s cubic-bezier(.4,0,.2,1) .55s forwards; opacity:.55; }
+  .s3 { stroke-width:1.2; stroke-dasharray:270; stroke-dashoffset:270; animation:draw .9s cubic-bezier(.4,0,.2,1) .7s forwards; opacity:.35; }
+  .s4 { stroke-width:.8; stroke-dasharray:180; stroke-dashoffset:180; animation:draw .75s cubic-bezier(.4,0,.2,1) .85s forwards; opacity:.2; }
+  @keyframes draw { to { stroke-dashoffset:0; } }
+  .subline { font-size:clamp(.62rem,1.6vw,.72rem); letter-spacing:.28em; padding-left:.28em; text-transform:uppercase; color:var(--ink); font-weight:400; opacity:0.6; transition:color 1.2s ease; }
+
+  /* ── PLAYER ── */
+  .player { display:flex; flex-direction:column; align-items:center; animation:rise 1.4s ease .2s both; }
+  .eq { display:flex; align-items:flex-end; justify-content:center; gap:3px; height:22px; margin-bottom:1.4rem; opacity:0; transition:opacity .7s ease; }
+  .eq.active { opacity:1; }
+  .eq-bar { width:2px; background:var(--accent); border-radius:2px 2px 0 0; height:3px; transition:height .09s ease, background 1.2s ease; }
+
+  /* ── PLAYER BUTTON STATES ── */
+
+  /* Wrapper holds both loading ring and play button, sized to largest */
+  .player-btn-wrap {
+    position: relative;
+    width: 82px; height: 82px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Loading ring — shown on page load while preparing */
+  .loading-ring {
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    animation: ringPulse 2.2s ease-in-out infinite;
+    transition: opacity .6s ease;
+    pointer-events: none;
+  }
+  .loading-ring::after {
+    content: '';
+    position: absolute; inset: 8px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    opacity: 0.5;
+    animation: ringPulse 2.2s ease-in-out infinite .4s;
+  }
+  @keyframes ringPulse {
+    0%,100% { transform: scale(1); opacity: 0.4; }
+    50%      { transform: scale(1.08); opacity: 0.9; }
+  }
+  .loading-ring.hidden { opacity: 0; pointer-events: none; }
+
+  /* Play button — hidden until ready */
+  .play-btn {
+    position: absolute;
+    width: 68px; height: 68px;
+    border-radius: 50%; border: 1.5px solid var(--ink);
+    background: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .3s, transform .3s, opacity .6s ease;
+    outline: none; -webkit-tap-highlight-color: transparent;
+    opacity: 0; pointer-events: none;
+  }
+  .play-btn::before {
+    content: ''; position: absolute;
+    width: 82px; height: 82px; border-radius: 50%;
+    border: 1px solid var(--border); transition: border-color 1.2s ease;
+  }
+  .play-btn.ready { opacity: 1; pointer-events: all; }
+  .play-btn:hover { border-color: var(--accent); transform: scale(1.04); }
+  .play-btn.playing { border-color: var(--accent); }
+  .play-btn.playing::before { animation: breathe 2.6s ease-in-out infinite; border-color: var(--accent); opacity: 0.3; }
+  @keyframes breathe { 0%,100%{transform:scale(1);opacity:.3;} 50%{transform:scale(1.14);opacity:.1;} }
+
+  .icon-play { width:0; height:0; border-top:9px solid transparent; border-bottom:9px solid transparent; border-left:15px solid var(--ink); margin-left:4px; transition:border-left-color 1.2s ease; }
+  .icon-pause { display:none; gap:5px; align-items:center; }
+  .icon-pause span { display:block; width:3px; height:14px; background:var(--accent); border-radius:1px; }
+  .play-btn.playing .icon-play { display:none; }
+  .play-btn.playing .icon-pause { display:flex; }
+
+  /* Now playing — minimal */
+  .now-playing { margin-top:1.4rem; opacity:0; transform:translateY(4px); transition:opacity .5s ease .1s,transform .5s ease .1s; }
+  .now-playing.visible { opacity:1; transform:translateY(0); }
+  .np-label { font-size:.58rem; letter-spacing:.24em; text-transform:uppercase; color:var(--ink); margin-bottom:.3rem; opacity:0.5; }
+  .np-title { font-size:clamp(1rem,3vw,1.3rem); font-weight:400; letter-spacing:.03em; color:var(--ink); font-style:italic; transition:color 1.2s ease; }
+  .np-meta { font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); margin-top:.2rem; opacity:0.6; }
+  .np-sc-link { display:block; margin-top:.5rem; font-size:.52rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); opacity:0.55; text-decoration:none; border-bottom:1px solid var(--border); padding-bottom:1px; transition:opacity .2s; width:fit-content; margin-left:auto; margin-right:auto; }
+  .np-sc-link:hover { opacity:0.9; color:var(--accent); }
+  .ident-dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin-left:.5rem; vertical-align:middle; opacity:0; transition:opacity .3s; }
+  .ident-dot.speaking { opacity:1; animation:blink .6s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.2;} }
+
+  .loading-text { font-size:.52rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); font-style:normal; animation:pulse 1.5s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:.4;} 50%{opacity:1;} }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    display: flex; align-items: center; gap: 2.5rem;
+    animation: rise 1.4s ease .4s both;
+  }
+
+  .nav-btn {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: .6rem; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--ink); opacity: 0.5;
+    background: none; border: none; cursor: pointer;
+    padding: .4rem 0;
+    transition: opacity .2s;
+    outline: none; -webkit-tap-highlight-color: transparent;
+  }
+  .nav-btn:hover { opacity: 1; }
+  .nav-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--ink); opacity: 0.2; }
+
+  #sc-frame { position:fixed; bottom:0; left:0; width:100%; height:1px; border:none; opacity:0; pointer-events:none; z-index:1; }
+
+  /* ── SLIDE-UP PANELS ── */
+  .panel-overlay {
+    position: fixed; inset: 0; z-index: 300;
+    display: flex; align-items: flex-end; justify-content: center;
+    pointer-events: none; padding: 0;
+  }
+  .panel-overlay.open { pointer-events: all; }
+
+  .panel-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0);
+    transition: background .35s ease;
+    z-index: -1;
+  }
+  .panel-overlay.open .panel-backdrop { background: rgba(0,0,0,0.45); }
+
+  .panel {
+    width: 100%; max-width: 520px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    border-radius: 12px 12px 0 0;
+    padding: 2rem 2rem 3rem;
+    transform: translateY(100%);
+    transition: transform .4s cubic-bezier(.22,1,.36,1);
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  .panel-overlay.open .panel { transform: translateY(0); }
+
+  .panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1.8rem;
+  }
+  .panel-title {
+    font-size: .6rem; letter-spacing: .24em; text-transform: uppercase;
+    color: var(--ink); opacity: 0.5;
+  }
+  .panel-close {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: .52rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink); opacity: 0.4;
+    background: none; border: none; cursor: pointer; outline: none;
+    transition: opacity .2s;
+  }
+  .panel-close:hover { opacity: 0.9; }
+
+  /* Schedule panel */
+  .sched-list { display: flex; flex-direction: column; gap: 0; }
+
+  .sched-section { margin-bottom: 1.8rem; }
+  .sched-section-label {
+    font-size: .5rem; letter-spacing: .2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: .8rem; opacity: 0.8;
+  }
+
+  .sched-row {
+    display: flex; align-items: baseline; gap: 1rem;
+    padding: .55rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .sched-row:last-child { border-bottom: none; }
+
+  .sched-row-num {
+    font-size: .46rem; letter-spacing: .1em;
+    color: var(--ink); opacity: 0.25; width: 1.2rem; flex-shrink: 0;
+    font-style: normal;
+  }
+  .sched-row-time {
+    font-size: .46rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink); opacity: 0.35; flex-shrink: 0; width: 4rem;
+    font-style: normal;
+  }
+  .sched-past { opacity: 0.3; }
+  .sched-past .sched-row-artist { text-decoration: line-through; text-decoration-color: var(--border); }
+  .sched-section-active { color: var(--accent) !important; opacity: 1 !important; }
+  .sched-sc-link {
+    color: inherit; text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color .2s, opacity .2s;
+  }
+  .sched-sc-link:hover { border-bottom-color: var(--accent); opacity: 0.8; }
+  .sched-row-artist {
+    font-size: .82rem; font-style: italic; color: var(--ink);
+    flex: 1; line-height: 1.3;
+  }
+  .sched-row-title {
+    font-size: .52rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--ink); opacity: 0.45; text-align: right; flex-shrink: 0;
+  }
+  .sched-now {
+    font-size: .44rem; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--accent); margin-left: .4rem;
+  }
+  .sched-loading {
+    font-size: .6rem; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink); opacity: 0.4; text-align: center; padding: 2rem 0;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  /* About panel */
+  .about-body {
+    font-size: clamp(.9rem, 2.2vw, 1.05rem);
+    font-weight: 300; line-height: 1.9;
+    color: var(--ink); opacity: 0.8;
+    font-style: italic;
+  }
+  .about-rule { width: 24px; height: 1px; background: var(--accent); margin: 1.4rem 0; }
+  .about-footer {
+    font-size: .5rem; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink); opacity: 0.4; line-height: 1.8;
+  }
+  .about-footer a { color: var(--ink); opacity: 0.6; text-decoration: none; border-bottom: 1px solid var(--border); }
+  .about-footer a:hover { opacity: 1; }
+
+  /* ── TRANSMISSION LOADING STATE ── */
+  .play-btn.loading { border-color: var(--accent); opacity: 0.5; pointer-events: none; }
+  .play-btn.loading::before { animation: breathe 2s ease-in-out infinite; border-color: var(--accent); opacity: 0.4; }
+  .play-btn.loading .icon-play { opacity: 0; }
+
+  /* Loading ring — shown inside button while entering transmission */
+  .loading-ring {
+    position: absolute;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    border-top-color: transparent;
+    animation: spin 1.2s linear infinite;
+    opacity: 0;
+    transition: opacity .4s ease;
+  }
+  .play-btn.loading .loading-ring { opacity: 0.8; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Entering transmission text */
+  .transmission-label {
+    margin-top: .9rem;
+    font-size: .52rem; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--ink); opacity: 0;
+    transition: opacity .6s ease;
+    min-height: 1rem;
+  }
+  .transmission-label.visible { opacity: 0.55; animation: pulse 2s ease-in-out infinite; }
+
+  /* ── TWO-STAGE PLAY BUTTON ── */
+  /* Tuning state: button pulses softly, ready hint appears */
+  .play-btn.tuning { border-color: var(--accent); }
+  .play-btn.tuning::before { animation: breathe 1.4s ease-in-out infinite; border-color: var(--accent); opacity: 0.3; }
+  .play-btn.tuning .icon-play { border-left-color: var(--accent); opacity: 0.4; }
+
+  .transmission-label.accent {
+    margin-top: .9rem;
+    font-size: .52rem; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--accent); opacity: 0;
+    transition: opacity .5s ease;
+    min-height: 1rem;
+  }
+  .transmission-label.accent.visible { opacity: 1; animation: pulse 1.8s ease-in-out infinite; }
+
+  /* ── SCHEDULE SLOTS ── */
+  .schedule { display:flex; flex-direction:row; align-items:center; justify-content:center; width:100%; max-width:520px; animation:rise 1.4s ease .4s both; }
+  .sched-item { display:flex; flex-direction:column; align-items:center; gap:.25rem; flex:1; cursor:pointer; padding:.6rem .4rem; transition:opacity .2s; -webkit-tap-highlight-color:transparent; }
+  .sched-item:hover { opacity:.6; }
+  .sched-item+.sched-item { border-left:1px solid var(--border); }
+  .sched-time { font-size:.5rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); white-space:nowrap; opacity:0.6; }
+  .sched-genre { font-size:.72rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); font-weight:400; white-space:nowrap; }
+  .sched-hint { width:12px; height:1px; background:var(--border); margin-top:.25rem; transition:width .3s ease,background .3s; }
+  .sched-item:hover .sched-hint { width:20px; background:var(--accent); }
+  .sched-item.now-slot .sched-genre { color:var(--accent); }
+  .sched-item.now-slot .sched-hint { width:20px; background:var(--accent); }
+  .sched-item.now-slot .sched-time { opacity:1; }
+
+  /* ── ATTRIBUTION ── */
+  .attribution { margin-top:.8rem; opacity:0; transform:translateY(4px); transition:opacity .5s ease .2s, transform .5s ease .2s; text-align:center; }
+  .attribution.visible { opacity:1; transform:translateY(0); }
+  .attr-link { font-size:.5rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); opacity:0.5; text-decoration:none; border-bottom:1px solid var(--border); padding-bottom:1px; transition:opacity .2s; }
+  .attr-link:hover { opacity:0.9; color:var(--accent); }
+  .attr-divider { margin:0 .5rem; opacity:.3; font-size:.5rem; }
+  .attr-disclaimer { display:block; margin-top:.35rem; font-size:.4rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink); opacity:0.35; font-style:italic; }
+
+  /* ── POPUP ── */
+  .overlay { position:fixed; inset:0; z-index:200; display:flex; align-items:flex-end; justify-content:center; pointer-events:none; padding:0 1rem 2rem; }
+  .overlay.open { pointer-events:all; }
+  .overlay-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0); transition:background .35s ease; z-index:-1; }
+  .overlay.open .overlay-backdrop { background:rgba(0,0,0,0.45); }
+  .popup { width:100%; max-width:420px; background:var(--bg); border:1px solid var(--border); border-radius:4px; padding:2rem 2rem 1.8rem; text-align:center; transform:translateY(24px); opacity:0; transition:transform .38s cubic-bezier(.22,1,.36,1),opacity .3s ease; box-shadow:0 8px 40px rgba(0,0,0,0.2); position:relative; }
+  .overlay.open .popup { transform:translateY(0); opacity:1; }
+  .popup-time { font-size:.5rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink); margin-bottom:.5rem; opacity:0.6; }
+  .popup-title { font-size:clamp(1.3rem,4vw,1.7rem); font-weight:300; letter-spacing:.08em; color:var(--ink); margin-bottom:.9rem; line-height:1.1; }
+  .popup-rule { width:28px; height:1px; background:var(--accent); margin:0 auto 1rem; }
+  .popup-body { font-size:clamp(.82rem,2vw,.92rem); font-weight:300; line-height:1.75; color:var(--ink); opacity:0.75; font-style:italic; }
+  .popup-close { position:absolute; top:1rem; right:1.2rem; background:none; border:none; cursor:pointer; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); font-family:'Cormorant Garamond',serif; opacity:0.5; transition:opacity .2s; outline:none; }
+  .popup-close:hover { opacity:1; }
+
+  /* ── INSTALL BANNER ── */
+  .install-banner {
+    position: fixed; bottom: 1.5rem; right: 1.2rem;
+    z-index: 150;
+    display: flex; align-items: center; gap: .6rem;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 40px; padding: .55rem 1rem;
+    cursor: pointer; opacity: 0;
+    animation: bannerIn 1s ease 2s forwards, bannerOut 0.6s ease 10s forwards;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity .3s;
+  }
+  .install-banner:hover { opacity: 0.9 !important; }
+  @keyframes bannerIn  { from{opacity:0;transform:translateY(6px);} to{opacity:0.75;transform:translateY(0);} }
+  @keyframes bannerOut { from{opacity:0.75;} to{opacity:0; pointer-events:none;} }
+  .install-banner-icon { font-size: .9rem; }
+  .install-banner-text {
+    font-size: .52rem; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--ink); font-family: 'Cormorant Garamond', serif;
+  }
+  .install-banner.hidden { display: none; }
+
+  /* Install instructions panel */
+  .install-steps { display: flex; flex-direction: column; gap: 1.2rem; margin-top: .5rem; }
+  .install-step { display: flex; align-items: flex-start; gap: 1rem; }
+  .install-step-num {
+    width: 1.4rem; height: 1.4rem; border-radius: 50%;
+    border: 1px solid var(--accent); color: var(--accent);
+    font-size: .5rem; letter-spacing: .1em;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: .1rem;
+  }
+  .install-step-text {
+    font-size: .78rem; font-style: italic; color: var(--ink);
+    opacity: 0.8; line-height: 1.5;
+  }
+  .install-step-text strong { font-style: normal; font-weight: 400; color: var(--accent); }
+
+  @keyframes rise { from{opacity:0;transform:translateY(9px);} to{opacity:1;transform:translateY(0);} }
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- BRAND -->
+  <div class="brand">
+    <div class="logo">
+      <span class="ll">F</span><span class="ll">L</span>
+      <span class="logo-o">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path class="s1" d="M 50,6 C 72,5 94,24 94,50 C 94,76 74,95 50,95 C 26,95 6,76 6,50 C 6,24 26,5 50,6"/>
+          <path class="s2" d="M 53,5 C 76,4 97,23 96,51 C 95,78 75,97 50,96 C 24,97 3,77 4,51 C 3,24 24,4 51,5"/>
+          <path class="s3" d="M 48,9 C 68,8 89,27 89,50 C 89,73 70,91 48,92 C 27,92 10,73 10,51 C 9,28 28,9 48,9"/>
+          <path class="s4" d="M 44,8 C 47,6 53,6 57,8"/>
+        </svg>
+      </span>
+      <span class="ll">R</span><span class="ll">A</span>
+    </div>
+    <div class="subline">Continuous electronic music transmission</div>
+  </div>
+
+  <!-- PLAYER -->
+  <div class="player">
+    <div class="eq" id="eq">
+      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+      <div class="eq-bar"></div><div class="eq-bar"></div><div class="eq-bar"></div>
+      <div class="eq-bar"></div>
+    </div>
+    <div class="player-btn-wrap">
+      <div class="loading-ring" id="loadingRing"></div>
+      <button class="play-btn loading" id="playBtn" onclick="togglePlay()">
+        <div class="icon-play"></div>
+        <div class="icon-pause"><span></span><span></span></div>
+      </button>
+    </div>
+    <div class="transmission-label visible" id="transmissionLabel">Entering the transmission</div>
+    <div class="transmission-label accent" id="tapLabel">Tap to listen</div>
+    <div class="now-playing" id="nowPlaying">
+      <div class="np-label">Now playing <span class="ident-dot" id="identDot"></span></div>
+      <div class="np-title" id="npTitle">—</div>
+      <div class="np-meta" id="npMeta"></div>
+      <a class="np-sc-link" id="npScLink" href="#" target="_blank" rel="noopener"></a>
+      <div class="attribution" id="attribution">
+        <a class="attr-link" id="attrSoundcloud" href="#" target="_blank" rel="noopener">Streamed via SoundCloud</a>
+        <span class="attr-divider">·</span>
+        <a class="attr-link" id="attrArtistPage" href="#" target="_blank" rel="noopener">Artist Page ↗</a>
+        <span class="attr-disclaimer">Flora does not host or own any audio content. All rights remain with the respective artists.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCHEDULE SLOTS -->
+  <div class="schedule">
+    <div class="sched-item" id="slot-day" onclick="openPopup('day')">
+      <div class="sched-time">7AM – 12PM</div>
+      <div class="sched-genre">Morning Drift</div>
+      <div class="sched-hint"></div>
+    </div>
+    <div class="sched-item" id="slot-evening" onclick="openPopup('evening')">
+      <div class="sched-time">12PM – 2AM</div>
+      <div class="sched-genre">The Ascent</div>
+      <div class="sched-hint"></div>
+    </div>
+    <div class="sched-item" id="slot-night" onclick="openPopup('night')">
+      <div class="sched-time">2AM – 7AM</div>
+      <div class="sched-genre">The Descent</div>
+      <div class="sched-hint"></div>
+    </div>
+  </div>
+
+</div>
+
+<iframe id="sc-frame" allow="autoplay" scrolling="no" frameborder="no"></iframe>
+
+<!-- SLOT POPUPS -->
+<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+  <div class="overlay-backdrop"></div>
+  <div class="popup" id="popup">
+    <button class="popup-close" onclick="closePopup()">Close</button>
+    <div class="popup-time" id="popupTime"></div>
+    <div class="popup-title" id="popupTitle"></div>
+    <div class="popup-rule"></div>
+    <div class="popup-body" id="popupBody"></div>
+  </div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div class="install-banner" id="installBanner" onclick="openPanel('install')">
+  <span class="install-banner-icon">⊕</span>
+  <span class="install-banner-text">Add to Home Screen</span>
+</div>
+
+<!-- INSTALL PANEL -->
+<div class="panel-overlay" id="panel-install" onclick="handlePanelClick(event,'install')">
+  <div class="panel-backdrop"></div>
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Add Flora to your home screen</div>
+      <button class="panel-close" onclick="closePanel('install')">Close</button>
+    </div>
+    <div class="install-steps" id="installSteps">
+      <!-- Populated by JS based on device -->
+    </div>
+  </div>
+</div>
+
+
+
+<script src="https://w.soundcloud.com/player/api.js"></script>
+<script>
+// ─────────────────────────────────────────────
+// iOS DETECTION
+// ─────────────────────────────────────────────
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+// ─────────────────────────────────────────────
+// THEME ENGINE
+// ─────────────────────────────────────────────
+const themes = {
+  'Morning':    'theme-morning',
+  'Afternoon':  'theme-ascent',
+  'Late Night': 'theme-descent'
+};
+
+function applyTheme(bucket) {
+  document.body.className = themes[bucket] || 'theme-morning';
+}
+
+// ─────────────────────────────────────────────
+// BUCKET / TIME
+// ─────────────────────────────────────────────
+function getCurrentBucket() {
+  const h = new Date().getHours();
+  if (h >= 7 && h < 12) return 'Morning';
+  if (h >= 2 && h < 7)  return 'Late Night';
+  return 'Afternoon';
+}
+
+// ── SLOT POPUPS ──
+const slotPopups = {
+  day:     { time:'7AM – 12PM',  title:'Morning Drift', body:'A morning selection of deep house, afro house, and organic electronica. Curated to ease you into your day with warm, textured sounds and a steady, unhurried groove.' },
+  evening: { time:'12PM – 2AM', title:'The Ascent',    body:'A continuous programme of house, tech house, progressive, and Chicago-influenced sets. Designed to build energy and elevate your mood through the afternoon and into the night.' },
+  night:   { time:'2AM – 7AM',  title:'The Descent',   body:'Late night programming for the dedicated listener. Deep techno, industrial, and dark electronic music for the after-hours hours. Uncompromising and immersive.' }
+};
+
+const overlayEl = document.getElementById('overlay');
+
+function openPopup(s) {
+  const sl = slotPopups[s];
+  document.getElementById('popupTime').textContent  = sl.time;
+  document.getElementById('popupTitle').textContent = sl.title;
+  document.getElementById('popupBody').textContent  = sl.body;
+  overlayEl.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePopup() {
+  overlayEl.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function handleOverlayClick(e) {
+  if (e.target === overlayEl || e.target.classList.contains('overlay-backdrop')) closePopup();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
+
+function highlightSlot() {
+  applyTheme(getCurrentBucket());
+}
+
+// ─────────────────────────────────────────────
+// SEEDED DAILY SHUFFLE
+// ─────────────────────────────────────────────
+function seededRandom(seed) {
+  let s = seed;
+  return () => { s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; };
+}
+function getDailySeed() {
+  const d = new Date();
+  return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();
+}
+function shuffleWithSeed(arr, seed) {
+  const rng=seededRandom(seed), a=[...arr];
+  for (let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+// ─────────────────────────────────────────────
+// 24/7 SYNC ENGINE
+// ─────────────────────────────────────────────
+function getSyncPosition(tracks) {
+  const now=new Date(), midnight=new Date(now);
+  midnight.setHours(0,0,0,0);
+  const secondsToday=Math.floor((now-midnight)/1000);
+  const totalDuration=tracks.reduce((sum,t)=>sum+(t.duration*60),0);
+  if (totalDuration===0) return {index:0,offsetSeconds:0};
+  const pos=secondsToday%totalDuration;
+  let elapsed=0;
+  for (let i=0;i<tracks.length;i++){
+    const dur=tracks[i].duration*60;
+    if (pos<elapsed+dur) return {index:i,offsetSeconds:Math.floor(pos-elapsed)};
+    elapsed+=dur;
+  }
+  return {index:0,offsetSeconds:0};
+}
+
+function formatTime(s) {
+  const m=Math.floor(s/60),sec=Math.floor(s%60);
+  return m+':'+sec.toString().padStart(2,'0');
+}
+
+// ─────────────────────────────────────────────
+// FETCH LIBRARY
+// ─────────────────────────────────────────────
+let tracks=[],currentIndex=0,startOffset=0,libraryLoaded=false;
+let _fetchPromise=null;
+
+async function fetchLibrary() {
+  if (libraryLoaded && tracks.length) return true;
+  if (_fetchPromise) return _fetchPromise;
+  _fetchPromise = _doFetch();
+  return _fetchPromise;
+}
+
+async function _doFetch() {
+  try {
+    const res  = await fetch('/api/library?bucket='+encodeURIComponent(getCurrentBucket()));
+    const data = await res.json();
+    if (!data.records||!data.records.length) return false;
+    const raw = data.records.map(r=>({
+      url:      r.fields.SoundCloud_URL    ||'',
+      title:    r.fields.Title             ||'Unknown Mix',
+      artist:   r.fields.Artist            ||'Unknown Artist',
+      year:     r.fields.Year              ||'',
+      event:    r.fields.Event             ||'',
+      artistSC: r.fields.Artist_SoundCloud ||'#',
+      duration: parseFloat(r.fields.Duration)||60,
+    })).filter(t=>t.url);
+    tracks = shuffleWithSeed(raw, getDailySeed());
+    const sync = getSyncPosition(tracks);
+    currentIndex = sync.index;
+    startOffset  = sync.offsetSeconds;
+    libraryLoaded = true;
+    return true;
+  } catch(e){console.error(e);_fetchPromise=null;return false;}
+}
+
+// ─────────────────────────────────────────────
+// VOICE IDENT
+// ─────────────────────────────────────────────
+const IDENT_MS=20*60*1000;
+let identTimer=null,isSpeaking=false;
+const dot=document.getElementById('identDot');
+
+// ── BRITISH FEMALE VOICE ──
+let _selectedVoice = null;
+function loadVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = [
+    'Google UK English Female',
+    'Microsoft Sonia Online (Natural) - English (United Kingdom)',
+    'Microsoft Libby Online (Natural) - English (United Kingdom)',
+    'Martha','Serena','Kate'
+  ];
+  for (const name of preferred) {
+    const match = voices.find(v => v.name === name);
+    if (match) { _selectedVoice = match; return; }
+  }
+  _selectedVoice = voices.find(v => v.lang === 'en-GB') ||
+                   voices.find(v => v.lang.startsWith('en')) || null;
+}
+
+function applyVoice(u) {
+  u.rate   = 1.0;
+  u.pitch  = 1.1;
+  u.volume = 1;
+  if (_selectedVoice) u.voice = _selectedVoice;
+}
+function setVol(v){if(widget)widget.setVolume(v);}
+function ramp(from,to,ms,done){
+  const steps=20,st=ms/steps,ss=(to-from)/steps;let cur=from,cnt=0;
+  const iv=setInterval(()=>{cur+=ss;cnt++;setVol(Math.round(Math.max(0,Math.min(100,cur))));if(cnt>=steps){clearInterval(iv);if(done)done();}},st);
+}
+function speakChunks(chunks, onDone) {
+  if (!chunks.length) {
+    isSpeaking=false; dot.classList.remove('speaking');
+    ramp(18,100,900,onDone);
+    return;
+  }
+  const chunk = chunks[0];
+  const rest  = chunks.slice(1);
+  const u = new SpeechSynthesisUtterance(chunk.text);
+  applyVoice(u);
+  u.onend  = () => setTimeout(() => speakChunks(rest, onDone), chunk.pause || 200);
+  u.onerror = () => { setVol(100); isSpeaking=false; dot.classList.remove('speaking'); if(onDone)onDone(); };
+  window.speechSynthesis.speak(u);
+}
+
+function speak(chunks, onDone) {
+  if (!window.speechSynthesis || isSpeaking) { if(onDone) onDone(); return; }
+  // Accept string or array
+  if (typeof chunks === 'string') chunks = [{ text: chunks, pause: 0 }];
+  isSpeaking = true; dot.classList.add('speaking');
+  ramp(100, 18, 700, () => speakChunks(chunks, onDone));
+}
+function artistCallout(){
+  if(!playing||!tracks.length) return;
+  const t = tracks[currentIndex];
+  speak([
+    { text: 'Flora Radio.',  pause: 320 },
+    { text: t.artist + '.',  pause: 220 },
+    { text: t.event + '.',   pause: 220 },
+    { text: String(t.year)+'.', pause: 0 }
+  ]);
+}
+function stationIdent(cb){
+  speak([
+    { text: 'Flora Radio.',                                  pause: 340 },
+    { text: 'Continuous electronic music transmission.',     pause: 0   }
+  ], cb);
+}
+
+// Track which bucket we're currently in
+var lastBucket = getCurrentBucket();
+
+// Transition announcements between time slots
+function speakTransition(bucket, cb) {
+  var scripts = {
+    'Morning': [
+      { text: 'Flora Radio.',                              pause: 340 },
+      { text: 'A new day begins.',                         pause: 300 },
+      { text: 'You are now entering Morning Drift.',       pause: 320 },
+      { text: 'Warm, unhurried, and deep.',                pause: 0   }
+    ],
+    'Afternoon': [
+      { text: 'Flora Radio.',                              pause: 340 },
+      { text: 'The energy is building.',                   pause: 280 },
+      { text: 'You are now entering The Ascent.',          pause: 320 },
+      { text: 'Peak time house and techno.',               pause: 240 },
+      { text: 'For the hours ahead.',                      pause: 0   }
+    ],
+    'Late Night': [
+      { text: 'Flora Radio.',                              pause: 340 },
+      { text: 'You are now entering The Descent.',         pause: 320 },
+      { text: 'Minimal, dark, and hypnotic.',              pause: 260 },
+      { text: 'Music for the deep hours.',                 pause: 0   }
+    ]
+  };
+  var chunks = scripts[bucket] || scripts['Afternoon'];
+  speak(chunks, cb);
+}
+function scheduleCallouts(){clearInterval(identTimer);identTimer=setInterval(()=>{if(playing)artistCallout();},IDENT_MS);}
+
+// ─────────────────────────────────────────────
+// SLOT BOUNDARY MONITOR
+// Checks every 60 seconds if the time slot has changed
+// If a mix is still playing past the boundary, transitions immediately
+// ─────────────────────────────────────────────
+var slotMonitorTimer = null;
+
+var transitioning = false;
+var boundaryTimer  = null;
+
+// ─────────────────────────────────────────────
+// PRECISE BOUNDARY SCHEDULER
+// Calculates exact ms until next slot boundary
+// and sets a single setTimeout to fire then.
+// Cannot miss. Cannot double-fire.
+// ─────────────────────────────────────────────
+
+function getMsUntilNextBoundary() {
+  // ── TEST MODE — fires in 2 minutes ──
+  // Remove this block and uncomment the real boundaries when done testing
+  return 2 * 60 * 1000;
+
+  // ── REAL BOUNDARIES — uncomment when done testing ──
+  // var now   = new Date();
+  // var h     = now.getHours();
+  // var m     = now.getMinutes();
+  // var s     = now.getSeconds();
+  // var ms    = now.getMilliseconds();
+  // var nowMs = ((h * 3600) + (m * 60) + s) * 1000 + ms;
+  // var boundaries = [
+  //   7  * 3600 * 1000,
+  //   12 * 3600 * 1000,
+  //   26 * 3600 * 1000
+  // ];
+  // var dayMs = 24 * 3600 * 1000;
+  // var next  = null;
+  // for (var i = 0; i < boundaries.length; i++) {
+  //   var b = boundaries[i] % dayMs;
+  //   var diff = b - nowMs;
+  //   if (diff < 0) diff += dayMs;
+  //   if (next === null || diff < next) next = diff;
+  // }
+  // return next;
+}
+
+function doTransition(newBucket) {
+  // Update theme visually
+  applyTheme(newBucket);
+  highlightSlot();
+
+  // Play transition audio then load new bucket
+  playTransitionAudio(newBucket, function() {
+    tracks = []; libraryLoaded = false; _fetchPromise = null;
+    fetchLibrary().then(function(ok) {
+      transitioning = false;
+      setVol(100);
+      if (!ok || !tracks.length) {
+        console.warn('Flora: no tracks for', newBucket);
+        scheduleBoundaryTransition();
+        return;
+      }
+      currentIndex   = 0;
+      loadedTrackUrl = null;
+      loadTrack(tracks[currentIndex], 0, true);
+      scheduleCallouts();
+      startSyncTimer();
+      scheduleBoundaryTransition();
+    }).catch(function() {
+      transitioning = false;
+      setVol(100);
+      scheduleBoundaryTransition();
+    });
+  });
+}
+
+function scheduleBoundaryTransition() {
+  clearTimeout(boundaryTimer);
+  var msUntil = getMsUntilNextBoundary();
+  console.log('Flora: next boundary in', Math.round(msUntil/1000/60), 'minutes');
+
+  boundaryTimer = setTimeout(function() {
+    if (!playing) {
+      // Not playing — still reschedule for the next boundary
+      scheduleBoundaryTransition();
+      return;
+    }
+
+    var newBucket = getCurrentBucket();
+    console.log('Flora: boundary timer fired — transitioning to', newBucket);
+
+    transitioning = true;
+    lastBucket    = newBucket;
+
+    // Cancel any speech or idents immediately
+    isSpeaking = false;
+    window.speechSynthesis.cancel();
+    clearInterval(identTimer);
+    stopSyncTimer();
+
+    // Fade out over 8 seconds — short enough to be reliable
+    ramp(100, 0, 8000, function() {
+      if (widget) widget.pause();
+      doTransition(newBucket);
+    });
+
+    // Safety net — if ramp fails for any reason, force transition after 12 seconds
+    setTimeout(function() {
+      if (!transitioning) return; // already completed
+      if (widget) widget.pause();
+      setVol(0);
+      doTransition(newBucket);
+    }, 12000);
+
+  }, msUntil);
+}
+
+// ─────────────────────────────────────────────
+// TRANSITION AUDIO
+// Uses recorded MP3 if available in /audio/
+// Falls back to speech synthesis if not
+// ─────────────────────────────────────────────
+// Universal transition audio bed — plays across all slot changes
+var TRANSITION_AUDIO = '/audio/floraradio-pulse.mp3';
+
+function playTransitionAudio(bucket, onDone) {
+  var audio = new Audio(TRANSITION_AUDIO);
+
+  audio.oncanplaythrough = function() {
+    audio.play().then(function() {
+      audio.onended = function() {
+        if (onDone) onDone();
+      };
+    }).catch(function() {
+      console.log('Flora: pulse audio unavailable, using speech');
+      isSpeaking = false;
+      speakTransition(bucket, onDone);
+    });
+  };
+
+  audio.onerror = function() {
+    console.log('Flora: floraradio-pulse.mp3 not found — using speech');
+    isSpeaking = false;
+    speakTransition(bucket, onDone);
+  };
+
+  audio.load();
+}
+
+// Keep startSlotMonitor as a no-op stub so nothing breaks
+function startSlotMonitor() {}
+
+// ─────────────────────────────────────────────
+// SOUNDCLOUD WIDGET — CLOCK-DRIVEN ENGINE
+//
+// Core principle: the clock is the source of truth.
+// Every 30 seconds Flora checks what SHOULD be playing
+// based on wall clock time, and reloads if needed.
+// No reliance on FINISH events. No stuck tracks.
+// ─────────────────────────────────────────────
+let widget = null, playing = false, eqTimer = null;
+let loadedTrackUrl = null;  // URL of currently loaded track
+let syncCheckTimer = null;  // 30-second clock sync timer
+
+const btn  = document.getElementById('playBtn');
+const eq   = document.getElementById('eq');
+const np   = document.getElementById('nowPlaying');
+const bars = document.querySelectorAll('.eq-bar');
+
+// Load a track into the iframe
+// autoplay=true: baked into iframe URL for reliability
+// autoplay=false: silent pre-load for first tap
+function loadTrack(track, offsetSecs, autoplay) {
+  widgetReady = false;
+  loadedTrackUrl = track.url;
+  const frame = document.getElementById('sc-frame');
+  frame.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(track.url) +
+    '&auto_play=' + (autoplay ? 'true' : 'false') +
+    '&buying=false&liking=false&download=false&sharing=false' +
+    '&show_artwork=false&show_comments=false&show_playcount=false' +
+    '&show_user=false&hide_related=true&visual=false&color=%23c8503a';
+  widget = SC.Widget(frame);
+  widget.bind(SC.Widget.Events.READY, function() {
+    if (offsetSecs > 0) widget.seekTo(offsetSecs * 1000);
+    updateNowPlaying(track, offsetSecs);
+    widgetReady = true;
+    if (autoplay) {
+      setAppState('playing');
+    } else {
+      setAppState('ready');
+    }
+  });
+
+  // FINISH event — fast path for instant track transition
+  // If this fires, great — immediate transition, no gap.
+  // If it doesn't fire, the 30-second clock sync catches it.
+  widget.bind(SC.Widget.Events.FINISH, function() {
+    if (!playing) return;
+    console.log('Flora: FINISH event fired — advancing track');
+    isSpeaking = false;
+    window.speechSynthesis.cancel();
+    // Recalculate sync position — clock may have moved since track started
+    var sync = getSyncPosition(tracks);
+    currentIndex = sync.index;
+    loadedTrackUrl = null; // force reload
+    loadTrack(tracks[currentIndex], sync.offsetSeconds, true);
+  });
+
+  // ERROR event — skip to next immediately
+  widget.bind(SC.Widget.Events.ERROR, function() {
+    if (!playing) return;
+    console.warn('Flora: track error, clock-syncing to next');
+    loadedTrackUrl = null;
+    var sync = getSyncPosition(tracks);
+    currentIndex = sync.index;
+    loadTrack(tracks[currentIndex], sync.offsetSeconds, true);
+  });
+}
+
+// ── CLOCK SYNC CHECK ──
+// Called every 30 seconds while playing.
+// Calculates what should be playing right now from the clock,
+// compares to what is loaded, reloads if they differ.
+function clockSyncCheck() {
+  // Only handles within-bucket sync
+  // Bucket transitions are handled by scheduleBoundaryTransition()
+  if (!playing || !libraryLoaded || !tracks.length || transitioning) return;
+
+  var sync = getSyncPosition(tracks);
+  if (tracks[sync.index] && tracks[sync.index].url !== loadedTrackUrl) {
+    console.log('Flora clock: resyncing to track', sync.index);
+    currentIndex = sync.index;
+    isSpeaking = false;
+    window.speechSynthesis.cancel();
+    loadTrack(tracks[currentIndex], sync.offsetSeconds, true);
+  }
+}
+
+function startSyncTimer() {
+  clearInterval(syncCheckTimer);
+  syncCheckTimer = setInterval(clockSyncCheck, 30000);
+}
+
+function stopSyncTimer() {
+  clearInterval(syncCheckTimer);
+}
+
+
+function updateNowPlaying(track, offsetSecs) {
+  if (!track) return;
+  document.getElementById('nowPlaying').classList.add('visible');
+  document.getElementById('npTitle').textContent = track.artist+' — '+track.title;
+  document.getElementById('npMeta').textContent  = (track.event||'')+' · '+(track.year||'');
+  var scLink = document.getElementById('npScLink');
+  if (scLink) {
+    if (track.artistSC && track.artistSC !== '#' && track.artistSC !== '') {
+      scLink.href = track.artistSC;
+      scLink.textContent = track.artist + ' on SoundCloud ↗';
+      scLink.style.visibility = 'visible';
+    } else {
+      scLink.textContent = '';
+      scLink.style.visibility = 'hidden';
+    }
+  }
+  // Attribution footer
+  var attrEl = document.getElementById('attribution');
+  var attrSC = document.getElementById('attrSoundcloud');
+  var attrAP = document.getElementById('attrArtistPage');
+  if (attrEl && attrSC && attrAP) {
+    attrSC.href = track.url || '#';
+    attrAP.href = track.artistSC || '#';
+    attrAP.textContent = track.artist + ' on SoundCloud ↗';
+    attrEl.classList.add('visible');
+  }
+}
+
+// ─────────────────────────────────────────────
+// PLAY STATE MACHINE
+//
+// loading — page load, widget pre-warming silently
+//           Button disabled, "Entering the transmission" shown
+//
+// ready   — widget loaded, waiting for tap
+//           Play button active, "Tap to listen" pulsing
+//
+// playing — audio running
+//           Pause button shown, hint fades OUT
+//
+// paused  — user paused
+//           Play button, "Tap to listen" fades back IN
+// ─────────────────────────────────────────────
+let widgetReady = false;
+let appState    = 'loading';
+
+const enteringEl = document.getElementById('transmissionLabel');
+const hintEl     = document.getElementById('tapLabel');
+
+function setAppState(state) {
+  appState = state;
+
+  if (state === 'loading') {
+    btn.classList.add('loading');
+    btn.classList.remove('tuning','playing');
+    if (enteringEl) { enteringEl.textContent = 'Entering the transmission'; enteringEl.classList.add('visible'); }
+    if (hintEl) hintEl.classList.remove('visible');
+  }
+
+  if (state === 'ready') {
+    btn.classList.remove('loading','tuning','playing');
+    // Hide loading ring, fade in play button
+    var ring = document.getElementById('loadingRing');
+    if (ring) ring.classList.add('hidden');
+    btn.classList.add('ready');
+    if (enteringEl) enteringEl.classList.remove('visible');
+    setTimeout(function() {
+      if (hintEl) hintEl.classList.add('visible');
+    }, 500);
+  }
+
+  if (state === 'playing') {
+    playing = true;
+    btn.classList.remove('loading','tuning');
+    btn.classList.add('playing');
+    eq.classList.add('active');
+    if (hintEl) hintEl.classList.remove('visible');
+    if (enteringEl) enteringEl.classList.remove('visible');
+    np.classList.add('visible');
+    startSyncTimer();    // clock-driven sync
+    startSlotMonitor();  // slot boundary check
+    runEQ();
+    scheduleCallouts();
+  }
+
+  if (state === 'paused') {
+    playing = false;
+    btn.classList.remove('playing','loading','tuning');
+    eq.classList.remove('active');
+    clearTimeout(eqTimer);
+    clearInterval(identTimer);
+    clearInterval(slotMonitorTimer);
+    stopSyncTimer();
+    bars.forEach(function(b) { b.style.height = '3px'; });
+    window.speechSynthesis.cancel();
+    isSpeaking = false;
+    dot.classList.remove('speaking');
+    setVol(100);
+    // Fade "Tap to listen" back in when paused
+    setTimeout(function() {
+      if (hintEl) hintEl.classList.add('visible');
+    }, 200);
+  }
+}
+
+function togglePlay() {
+  window.speechSynthesis.getVoices();
+
+  // Loading — ignore tap, widget not ready
+  if (appState === 'loading') return;
+
+  // Ready or paused — play fires synchronously from this gesture
+  if (appState === 'ready' || appState === 'paused') {
+    if (widget) {
+      widget.play();
+      setAppState('playing'); // starts sync timer, EQ, callouts
+    }
+    return;
+  }
+
+  // Playing — pause
+  if (appState === 'playing') {
+    if (widget) widget.pause();
+    setAppState('paused'); // stops sync timer
+    return;
+  }
+}
+
+function runEQ(){
+  if(!playing)return;
+  bars.forEach(b=>{b.style.height=(Math.random()<.12?2+Math.random()*3:4+Math.random()*18)+'px';});
+  eqTimer=setTimeout(runEQ,100+Math.random()*90);
+}
+
+// ─────────────────────────────────────────────
+// PANELS
+// ─────────────────────────────────────────────
+function openPanel(name) {
+  document.getElementById('panel-'+name).classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (name === 'schedule') buildSchedulePanel();
+}
+
+function closePanel(name) {
+  document.getElementById('panel-'+name).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function handlePanelClick(e, name) {
+  if (e.target === document.getElementById('panel-'+name) ||
+      e.target.classList.contains('panel-backdrop')) {
+    closePanel(name);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closePanel('schedule'); closePanel('about');
+  }
+});
+
+// Build the schedule list from today's queue
+// Fetch a specific bucket from Airtable (used by schedule panel)
+async function fetchBucket(bucket) {
+  try {
+    const res  = await fetch('/api/library?bucket=' + encodeURIComponent(bucket));
+    const data = await res.json();
+    if (!data.records || !data.records.length) return [];
+    return data.records.map(r => ({
+      url:      r.fields.SoundCloud_URL    || '',
+      title:    r.fields.Title             || 'Unknown Mix',
+      artist:   r.fields.Artist            || 'Unknown Artist',
+      year:     r.fields.Year              || '',
+      event:    r.fields.Event             || '',
+      artistSC: r.fields.Artist_SoundCloud || '#',
+      duration: parseFloat(r.fields.Duration) || 60,
+    })).filter(t => t.url);
+  } catch(e) { console.error(e); return []; }
+}
+
+async function buildSchedulePanel() {
+  const list = document.getElementById('schedList');
+  list.innerHTML = '<div class="sched-loading">Loading schedule</div>';
+
+  const slotDefs = [
+    { bucket:'Morning',    label:'Morning Drift', timeLabel:'7AM – 12PM', startSecs: 7*3600,  endSecs: 12*3600          },
+    { bucket:'Afternoon',  label:'The Ascent',    timeLabel:'12PM – 2AM', startSecs: 12*3600, endSecs: 26*3600          },
+    { bucket:'Late Night', label:'The Descent',   timeLabel:'2AM – 7AM',  startSecs: 2*3600,  endSecs: 7*3600           }
+  ];
+
+  const currentBucket = getCurrentBucket();
+  const now = new Date(), midnight = new Date(now);
+  midnight.setHours(0,0,0,0);
+  const nowSecs = Math.floor((now - midnight) / 1000);
+
+  function secsToTime(secs) {
+    const s = ((secs % 86400) + 86400) % 86400;
+    const h    = Math.floor(s / 3600) % 24;
+    const m    = Math.floor((s % 3600) / 60);
+    const ampm = h < 12 ? 'AM' : 'PM';
+    const h12  = h % 12 || 12;
+    return h12 + ':' + m.toString().padStart(2,'0') + ' ' + ampm;
+  }
+
+  let html = '';
+
+  for (const slot of slotDefs) {
+    // For the current bucket use the EXACT same tracks array already playing
+    // For other buckets fetch and shuffle with same daily seed
+    let bucketTracks;
+    if (slot.bucket === currentBucket && tracks.length) {
+      bucketTracks = tracks; // same order as what's actually playing
+    } else {
+      const raw = await fetchBucket(slot.bucket);
+      bucketTracks = shuffleWithSeed(raw, getDailySeed());
+    }
+
+    if (!bucketTracks.length) continue;
+
+    const isCurrentSlot = slot.bucket === currentBucket;
+    const slotDurSecs   = slot.endSecs - slot.startSecs;
+
+    // Walk through tracks, assigning times, stop when slot is full
+    let elapsed = 0;
+    const slotTrackData = [];
+
+    for (let i = 0; i < bucketTracks.length; i++) {
+      if (elapsed >= slotDurSecs) break;
+      const t         = bucketTracks[i];
+      const wallSecs  = slot.startSecs + elapsed;
+      const trackDur  = t.duration * 60;
+
+      // Determine if this track is currently playing
+      // For current slot: compare by url match against active track
+      const isNow = isCurrentSlot && tracks[currentIndex] && t.url === tracks[currentIndex].url;
+
+      // Determine if past: wall clock end time has passed
+      const trackEndWall = wallSecs + trackDur;
+      const isPast = trackEndWall < nowSecs && !isNow;
+
+      slotTrackData.push({ track: t, wallSecs, isNow, isPast });
+      elapsed += trackDur;
+    }
+
+    if (!slotTrackData.length) continue;
+
+    html += '<div class="sched-section">';
+    html += '<div class="sched-section-label' + (isCurrentSlot ? ' sched-section-active' : '') + '">';
+    html += slot.label + '  ·  ' + slot.timeLabel;
+    html += '</div>';
+
+    slotTrackData.forEach(td => {
+      html += '<div class="sched-row' + (td.isPast ? ' sched-past' : '') + '">';
+      html += '<div class="sched-row-time">' + secsToTime(td.wallSecs) + '</div>';
+      const scUrl = td.track.url || '#';
+      html += '<div class="sched-row-artist">';
+      html += '<a class="sched-sc-link" href="' + scUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">';
+      html += td.track.artist + ' — ' + td.track.title;
+      html += '</a>';
+      if (td.isNow) html += '<span class="sched-now">● Now</span>';
+      html += '</div>';
+      html += '<div class="sched-row-title">' + td.track.year + '</div>';
+      html += '</div>';
+    });
+
+    html += '</div>';
+  }
+
+  list.innerHTML = html || '<div class="sched-loading">No mixes scheduled</div>';
+
+  setTimeout(() => {
+    const nowEl = list.querySelector('.sched-now');
+    if (nowEl) nowEl.closest('.sched-row').scrollIntoView({ behavior:'smooth', block:'center' });
+  }, 300);
+}
+
+window.speechSynthesis.onvoiceschanged = loadVoice;
+loadVoice();
+
+// ── STARTUP: show "Entering the transmission" and preload silently ──
+// Apply theme immediately on load
+highlightSlot();
+
+(function() {
+  // Show loading state immediately
+  setAppState('loading');
+
+  // Fetch library and pre-warm widget in background before user taps
+  fetchLibrary().then(function(ok) {
+    if (!ok || !tracks.length) {
+      var el = document.getElementById('transmissionLabel');
+      if (el) el.textContent = 'No mixes found — check Airtable';
+      return;
+    }
+    // Silently load widget — setAppState('ready') fires when SC.Widget READY event fires
+    loadTrack(tracks[currentIndex], startOffset, false);
+  }).catch(function() {
+    var el = document.getElementById('transmissionLabel');
+    if (el) el.textContent = 'Connection error — refresh to retry';
+  });
+})();
+
+// ─────────────────────────────────────────────
+// INSTALL BANNER
+// ─────────────────────────────────────────────
+(function() {
+  // Hide if already installed as PWA
+  if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+    var b = document.getElementById('installBanner');
+    if (b) b.classList.add('hidden');
+    return;
+  }
+
+  // Build device-appropriate instructions
+  var isIOS    = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  var isAndroid = /Android/.test(navigator.userAgent);
+  var isChrome = /Chrome/.test(navigator.userAgent) && !isIOS;
+
+  var steps = [];
+
+  if (isIOS) {
+    steps = [
+      { num:'1', text:'Tap the <strong>Share</strong> button at the bottom of Safari (the box with an arrow pointing up)' },
+      { num:'2', text:'Scroll down and tap <strong>Add to Home Screen</strong>' },
+      { num:'3', text:'Tap <strong>Add</strong> — Flora will appear on your home screen like a native app' }
+    ];
+  } else if (isChrome || isAndroid) {
+    steps = [
+      { num:'1', text:'Tap the <strong>three dots</strong> menu in the top right of Chrome' },
+      { num:'2', text:'Tap <strong>Add to Home Screen</strong>' },
+      { num:'3', text:'Tap <strong>Add</strong> — Flora will appear on your home screen' }
+    ];
+  } else {
+    steps = [
+      { num:'1', text:'Open floraradio.com in <strong>Safari</strong> on iPhone or <strong>Chrome</strong> on Android' },
+      { num:'2', text:'Tap the share or menu icon in your browser' },
+      { num:'3', text:'Select <strong>Add to Home Screen</strong>' }
+    ];
+  }
+
+  var html = '';
+  steps.forEach(function(s) {
+    html += '<div class="install-step">';
+    html += '<div class="install-step-num">'+s.num+'</div>';
+    html += '<div class="install-step-text">'+s.text+'</div>';
+    html += '</div>';
+  });
+  document.getElementById('installSteps').innerHTML = html;
+})();
+</script>
+</body>
+</html>
