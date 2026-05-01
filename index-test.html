@@ -828,12 +828,14 @@ function getMsUntilNextBoundary() {
 }
 
 function doTransition(newBucket) {
+  debugLog('doTransition called → ' + newBucket);
   // Update theme visually
   applyTheme(newBucket);
   highlightSlot();
 
   // Play transition audio then load new bucket
   playTransitionAudio(newBucket, function() {
+    debugLog('Audio done — fetching new library');
     tracks = []; libraryLoaded = false; _fetchPromise = null;
     fetchLibrary().then(function(ok) {
       transitioning = false;
@@ -845,6 +847,7 @@ function doTransition(newBucket) {
       }
       currentIndex   = 0;
       loadedTrackUrl = null;
+      debugLog('Loading track: ' + tracks[currentIndex].artist);
       loadTrack(tracks[currentIndex], 0, true);
       scheduleCallouts();
       startSyncTimer();
@@ -857,10 +860,18 @@ function doTransition(newBucket) {
   });
 }
 
+function debugLog(msg) {
+  var el = document.getElementById('debugPanel');
+  if (!el) return;
+  var t = new Date().toLocaleTimeString();
+  el.innerHTML = '<div>' + t + ' — ' + msg + '</div>' + el.innerHTML;
+}
+
 function scheduleBoundaryTransition() {
   clearTimeout(boundaryTimer);
   var msUntil = getMsUntilNextBoundary();
-  console.log('Flora: next boundary in', Math.round(msUntil/1000/60), 'minutes');
+  debugLog('Next boundary in ' + Math.round(msUntil/1000) + ' seconds');
+  console.log('Flora: next boundary in', Math.round(msUntil/1000), 'seconds');
 
   boundaryTimer = setTimeout(function() {
     if (!playing) {
@@ -871,9 +882,11 @@ function scheduleBoundaryTransition() {
 
     var newBucket = getCurrentBucket();
     console.log('Flora: boundary timer fired — transitioning to', newBucket);
+    debugLog('⚡ BOUNDARY FIRED → ' + newBucket);
 
     transitioning = true;
     lastBucket    = newBucket;
+    debugLog('Transitioning... fading out');
 
     // Cancel any speech or idents immediately
     isSpeaking = false;
@@ -883,6 +896,7 @@ function scheduleBoundaryTransition() {
 
     // Fade out over 8 seconds — short enough to be reliable
     ramp(100, 0, 8000, function() {
+      debugLog('Fade complete — pausing widget');
       if (widget) widget.pause();
       doTransition(newBucket);
     });
@@ -1379,5 +1393,13 @@ highlightSlot();
   document.getElementById('installSteps').innerHTML = html;
 })();
 </script>
+
+<div id="debugPanel" style="
+  position:fixed; bottom:0; left:0; right:0; z-index:9999;
+  background:rgba(0,0,0,0.85); color:#00ff88;
+  font-family:monospace; font-size:11px;
+  padding:8px; max-height:120px; overflow-y:auto;
+  border-top:1px solid #00ff88;
+"></div>
 </body>
 </html>
