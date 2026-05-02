@@ -1301,6 +1301,9 @@ loadVoice();
 // Apply theme immediately on load
 highlightSlot();
 
+// START BOUNDARY TIMER
+scheduleBoundaryTransition();
+
 (function() {
   // Show loading state immediately
   setAppState('loading');
