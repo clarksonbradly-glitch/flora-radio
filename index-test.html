@@ -890,15 +890,13 @@ function scheduleBoundaryTransition() {
   _boundaryMs  = msUntil;
   _boundarySet = Date.now();
   boundaryTimer = setTimeout(function() {
-    if (!playing) {
-      // Not playing — still reschedule for the next boundary
-      scheduleBoundaryTransition();
-      return;
-    }
+    // TEST MODE — force transition to next bucket regardless of playing state
+    var buckets = ['Morning', 'Afternoon', 'Late Night'];
+    var currentIdx = buckets.indexOf(lastBucket);
+    var newBucket = buckets[(currentIdx + 1) % 3];
 
-    var newBucket = getCurrentBucket();
+    debugLog('⚡ BOUNDARY FIRED → ' + newBucket + ' (playing=' + playing + ')');
     console.log('Flora: boundary timer fired — transitioning to', newBucket);
-    debugLog('⚡ BOUNDARY FIRED → ' + newBucket);
 
     transitioning = true;
     lastBucket    = newBucket;
