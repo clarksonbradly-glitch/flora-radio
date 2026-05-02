@@ -540,6 +540,16 @@
 
 <script src="https://w.soundcloud.com/player/api.js"></script>
 <script>
+// DEBUG — defined first so all code can use it
+function debugLog(msg) {
+  var el = document.getElementById('floraDebug');
+  if (!el) { console.log('DEBUG:', msg); return; }
+  var d = new Date().toLocaleTimeString();
+  el.innerHTML = '<div style="padding:1px 0">' + d + ' — ' + msg + '</div>' + el.innerHTML;
+}
+window.debugLog = debugLog;
+</script>
+<script>
 // ─────────────────────────────────────────────
 // iOS DETECTION
 // ─────────────────────────────────────────────
