@@ -712,6 +712,11 @@ function ramp(from,to,ms,done){
   const steps=20,st=ms/steps,ss=(to-from)/steps;let cur=from,cnt=0;
   const iv=setInterval(()=>{cur+=ss;cnt++;setVol(Math.round(Math.max(0,Math.min(100,cur))));if(cnt>=steps){clearInterval(iv);if(done)done();}},st);
 }
+function getSpanishVoice() {
+  var voices = window.speechSynthesis.getVoices();
+  return voices.find(function(v) { return v.lang === 'es-MX' || v.lang === 'es-US' || v.lang.startsWith('es'); }) || null;
+}
+
 function speakChunks(chunks, onDone) {
   if (!chunks.length) {
     isSpeaking=false; dot.classList.remove('speaking');
@@ -721,7 +726,24 @@ function speakChunks(chunks, onDone) {
   const chunk = chunks[0];
   const rest  = chunks.slice(1);
   const u = new SpeechSynthesisUtterance(chunk.text);
-  applyVoice(u);
+
+  // Detect Spanish text and use Spanish voice
+  var isSpanish = /[áéíóúüñ¿¡]/i.test(chunk.text) || chunk.text.toLowerCase().includes('escuchando');
+  if (isSpanish) {
+    var esVoice = getSpanishVoice();
+    if (esVoice) {
+      u.voice = esVoice;
+      u.lang  = esVoice.lang;
+      u.rate  = 1.0;
+      u.pitch = 1.1;
+      u.volume = 1;
+    } else {
+      applyVoice(u);
+    }
+  } else {
+    applyVoice(u);
+  }
+
   u.onend  = () => setTimeout(() => speakChunks(rest, onDone), chunk.pause || 200);
   u.onerror = () => { setVol(100); isSpeaking=false; dot.classList.remove('speaking'); if(onDone)onDone(); };
   window.speechSynthesis.speak(u);
@@ -745,10 +767,9 @@ function artistCallout(){
   ]);
 }
 function stationIdent(cb){
-  speak([
-    { text: 'Flora Radio.',                                  pause: 340 },
-    { text: 'Continuous electronic music transmission.',     pause: 0   }
-  ], cb);
+  // Use the full floraradio-pulse.mp3 between mixes
+  // Falls back to speech if file not available
+  playTransitionAudio(getCurrentBucket(), cb);
 }
 
 // Track which bucket we're currently in
