@@ -908,25 +908,48 @@ function scheduleBoundaryTransition() {
 var TRANSITION_AUDIO = '/audio/floraradio-pulse.mp3';
 
 function playTransitionAudio(bucket, onDone) {
+  var done = false;
+  function finish() {
+    if (done) return;
+    done = true;
+    if (onDone) onDone();
+  }
+
+  // Safety net — always call onDone after 35 seconds max
+  var safetyTimer = setTimeout(finish, 35000);
+
   var audio = new Audio(TRANSITION_AUDIO);
 
   audio.oncanplaythrough = function() {
     audio.play().then(function() {
       audio.onended = function() {
-        if (onDone) onDone();
+        clearTimeout(safetyTimer);
+        finish();
       };
     }).catch(function() {
-      console.log('Flora: pulse audio unavailable, using speech');
+      console.log('Flora: pulse audio blocked — using speech');
+      clearTimeout(safetyTimer);
       isSpeaking = false;
-      speakTransition(bucket, onDone);
+      speakTransition(bucket, finish);
     });
   };
 
   audio.onerror = function() {
-    console.log('Flora: floraradio-pulse.mp3 not found — using speech');
+    console.log('Flora: pulse MP3 not found — using speech');
+    clearTimeout(safetyTimer);
     isSpeaking = false;
-    speakTransition(bucket, onDone);
+    speakTransition(bucket, finish);
   };
+
+  // Extra fallback — if nothing fires in 5 seconds, try speech
+  setTimeout(function() {
+    if (!done && audio.readyState < 3) {
+      console.log('Flora: audio stalled — using speech');
+      clearTimeout(safetyTimer);
+      isSpeaking = false;
+      speakTransition(bucket, finish);
+    }
+  }, 5000);
 
   audio.load();
 }
