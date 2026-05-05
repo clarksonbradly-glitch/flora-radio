@@ -556,7 +556,13 @@ const themes = {
 };
 
 function applyTheme(bucket) {
-  document.body.className = themes[bucket] || 'theme-morning';
+  // Preserve any existing non-theme classes
+  var current = document.body.className;
+  var nonTheme = current.split(' ').filter(function(c) {
+    return c && !c.startsWith('theme-');
+  }).join(' ');
+  var theme = themes[bucket] || 'theme-morning';
+  document.body.className = nonTheme ? theme + ' ' + nonTheme : theme;
 }
 
 // ─────────────────────────────────────────────
@@ -645,17 +651,21 @@ function formatTime(s) {
 // ─────────────────────────────────────────────
 let tracks=[],currentIndex=0,startOffset=0,libraryLoaded=false;
 let _fetchPromise=null;
+let _targetBucket=null; // explicit bucket override
 
-async function fetchLibrary() {
-  if (libraryLoaded && tracks.length) return true;
-  if (_fetchPromise) return _fetchPromise;
+async function fetchLibrary(forceBucket) {
+  if (forceBucket) _targetBucket = forceBucket;
+  if (libraryLoaded && tracks.length && !forceBucket) return true;
+  if (_fetchPromise && !forceBucket) return _fetchPromise;
   _fetchPromise = _doFetch();
   return _fetchPromise;
 }
 
 async function _doFetch() {
   try {
-    const res  = await fetch('/api/library?bucket='+encodeURIComponent(getCurrentBucket()));
+    var bucket = _targetBucket || getCurrentBucket();
+    _targetBucket = null; // clear after use
+    const res  = await fetch('/api/library?bucket='+encodeURIComponent(bucket));
     const data = await res.json();
     if (!data.records||!data.records.length) return false;
     const raw = data.records.map(r=>({
@@ -857,7 +867,7 @@ function doTransition(newBucket) {
   // Play transition audio then load new bucket
   playTransitionAudio(newBucket, function() {
     tracks = []; libraryLoaded = false; _fetchPromise = null;
-    fetchLibrary().then(function(ok) {
+    fetchLibrary(newBucket).then(function(ok) {
       transitioning = false;
       setVol(100);
       if (!ok || !tracks.length) {
@@ -903,19 +913,28 @@ function scheduleBoundaryTransition() {
     clearInterval(identTimer);
     stopSyncTimer();
 
-    // Fade out over 8 seconds — short enough to be reliable
+    // Pause widget immediately — don't rely on fade completing
+    if (widget) {
+      try { widget.setVolume(0); } catch(e) {}
+      setTimeout(function() {
+        try { widget.pause(); } catch(e) {}
+      }, 8000);
+    }
+
+    // Fade out over 8 seconds visually
     ramp(100, 0, 8000, function() {
-      if (widget) widget.pause();
+      if (widget) { try { widget.pause(); } catch(e) {} }
       doTransition(newBucket);
     });
 
-    // Safety net — if ramp fails for any reason, force transition after 12 seconds
+    // Hard safety net at 10 seconds — cannot be stopped
     setTimeout(function() {
-      if (!transitioning) return; // already completed
-      if (widget) widget.pause();
+      if (!transitioning) return;
+      if (widget) { try { widget.pause(); } catch(e) {} }
       setVol(0);
-      doTransition(newBucket);
-    }, 12000);
+      transitioning && doTransition(newBucket);
+      transitioning = false; // prevent double-fire
+    }, 10000);
 
   }, msUntil);
 }
@@ -928,6 +947,15 @@ function scheduleBoundaryTransition() {
 // Universal transition audio bed — plays across all slot changes
 var TRANSITION_AUDIO = '/audio/floraradio-pulse.mp3';
 
+// Pre-load audio on page load so it's ready to fire instantly
+var _preloadedAudio = null;
+(function() {
+  try {
+    _preloadedAudio = new Audio(TRANSITION_AUDIO);
+    _preloadedAudio.load();
+  } catch(e) {}
+})();
+
 function playTransitionAudio(bucket, onDone) {
   var done = false;
   function finish() {
@@ -939,7 +967,9 @@ function playTransitionAudio(bucket, onDone) {
   // Safety net — always call onDone after 35 seconds max
   var safetyTimer = setTimeout(finish, 35000);
 
-  var audio = new Audio(TRANSITION_AUDIO);
+  // Use preloaded audio if available, otherwise create new
+  var audio = _preloadedAudio || new Audio(TRANSITION_AUDIO);
+  _preloadedAudio = null; // reset so next transition creates fresh
 
   audio.oncanplaythrough = function() {
     audio.play().then(function() {
