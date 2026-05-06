@@ -790,30 +790,43 @@ function playIdentTrack(cb) {
   identPlaying = true;
   var frame = document.getElementById('sc-frame');
 
-  // Load ident track with autoplay
+  // Load ident track with autoplay — use global widget so no conflict
   frame.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(IDENT_SC_URL) +
     '&auto_play=true&buying=false&liking=false&download=false&sharing=false' +
     '&show_artwork=false&show_comments=false&show_playcount=false' +
     '&show_user=false&hide_related=true&visual=false&color=%23c8503a';
 
-  var identWidget = SC.Widget(frame);
+  // Use global widget — prevents two instances conflicting on same frame
+  widget = SC.Widget(frame);
+  widgetReady = false;
 
   // Safety net — if FINISH doesn't fire within 3 minutes, move on
   var safetyTimer = setTimeout(function() {
     identPlaying = false;
+    widgetReady = false;
     if (cb) cb();
   }, 3 * 60 * 1000);
 
-  identWidget.bind(SC.Widget.Events.FINISH, function() {
-    clearTimeout(safetyTimer);
-    identPlaying = false;
-    if (cb) cb();
+  widget.bind(SC.Widget.Events.READY, function() {
+    widgetReady = true;
+    // Ident loaded and playing — just wait for FINISH
   });
 
-  identWidget.bind(SC.Widget.Events.ERROR, function() {
+  widget.bind(SC.Widget.Events.FINISH, function() {
     clearTimeout(safetyTimer);
     identPlaying = false;
-    console.warn('Flora: ident track error — skipping');
+    widgetReady = false;
+    // Small pause before loading next track
+    setTimeout(function() {
+      if (cb) cb();
+    }, 500);
+  });
+
+  widget.bind(SC.Widget.Events.ERROR, function() {
+    clearTimeout(safetyTimer);
+    identPlaying = false;
+    widgetReady = false;
+    console.warn('Flora: ident track error — skipping to next mix');
     if (cb) cb();
   });
 }
@@ -900,8 +913,8 @@ function doTransition(newBucket) {
   applyTheme(newBucket);
   highlightSlot();
 
-  // Play ident via SoundCloud (same path as between-mix ident)
-  stationIdent(function() {
+  // Play transition audio then load new bucket
+  playTransitionAudio(newBucket, function() {
     tracks = []; libraryLoaded = false; _fetchPromise = null;
     fetchLibrary(newBucket).then(function(ok) {
       transitioning = false;
