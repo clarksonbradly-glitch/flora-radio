@@ -777,9 +777,45 @@ function artistCallout(){
   ]);
 }
 function stationIdent(cb){
-  // Use the full floraradio-pulse.mp3 between mixes
-  // Falls back to speech if file not available
-  playTransitionAudio(getCurrentBucket(), cb);
+  // Play ident via SoundCloud widget — same reliable path as regular mixes
+  if (!IDENT_SC_URL || IDENT_SC_URL === 'YOUR_SOUNDCLOUD_IDENT_URL_HERE') {
+    // No ident URL set yet — fall back to MP3 or speech
+    playTransitionAudio(getCurrentBucket(), cb);
+    return;
+  }
+  playIdentTrack(cb);
+}
+
+function playIdentTrack(cb) {
+  identPlaying = true;
+  var frame = document.getElementById('sc-frame');
+
+  // Load ident track with autoplay
+  frame.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(IDENT_SC_URL) +
+    '&auto_play=true&buying=false&liking=false&download=false&sharing=false' +
+    '&show_artwork=false&show_comments=false&show_playcount=false' +
+    '&show_user=false&hide_related=true&visual=false&color=%23c8503a';
+
+  var identWidget = SC.Widget(frame);
+
+  // Safety net — if FINISH doesn't fire within 3 minutes, move on
+  var safetyTimer = setTimeout(function() {
+    identPlaying = false;
+    if (cb) cb();
+  }, 3 * 60 * 1000);
+
+  identWidget.bind(SC.Widget.Events.FINISH, function() {
+    clearTimeout(safetyTimer);
+    identPlaying = false;
+    if (cb) cb();
+  });
+
+  identWidget.bind(SC.Widget.Events.ERROR, function() {
+    clearTimeout(safetyTimer);
+    identPlaying = false;
+    console.warn('Flora: ident track error — skipping');
+    if (cb) cb();
+  });
 }
 
 // Track which bucket we're currently in
@@ -864,8 +900,8 @@ function doTransition(newBucket) {
   applyTheme(newBucket);
   highlightSlot();
 
-  // Play transition audio then load new bucket
-  playTransitionAudio(newBucket, function() {
+  // Play ident via SoundCloud (same path as between-mix ident)
+  stationIdent(function() {
     tracks = []; libraryLoaded = false; _fetchPromise = null;
     fetchLibrary(newBucket).then(function(ok) {
       transitioning = false;
@@ -946,6 +982,13 @@ function scheduleBoundaryTransition() {
 // ─────────────────────────────────────────────
 // Universal transition audio bed — plays across all slot changes
 var TRANSITION_AUDIO = '/audio/floraradio-pulse.mp3';
+
+// ─────────────────────────────────────────────
+// STATION IDENT — SoundCloud track
+// Upload floraradio-pulse.mp3 to SoundCloud and paste the URL here
+// ─────────────────────────────────────────────
+var IDENT_SC_URL = 'https://soundcloud.com/brad-clarkson-421298152/floraradio-pulse-mp3';
+var identPlaying = false;
 
 // Pre-load audio on page load so it's ready to fire instantly
 var _preloadedAudio = null;
