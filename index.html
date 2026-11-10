@@ -23,53 +23,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --bg: #f5f2ec; --ink: #111010; --accent: #c8503a; --border: rgba(17,16,16,0.15); }
 
-  :root {
-    --bg: #f5f2ec; --ink: #111010; --accent: #c8503a; --border: rgba(17,16,16,0.15);
-  }
-
-  body.theme-morning {
-    --bg: #f0e8d8; --ink: #1a1208; --accent: #c8712a; --border: rgba(60,40,10,0.2);
-    background: var(--bg);
-  }
-  body.theme-morning::after {
-    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background: radial-gradient(ellipse at 50% 110%, rgba(220,160,60,0.25) 0%, transparent 70%),
-                radial-gradient(ellipse at 20% 80%, rgba(200,120,40,0.12) 0%, transparent 50%);
-  }
-  body.theme-ascent {
-    --bg: #070d1a; --ink: #e8f0ff; --accent: #4a9eff; --border: rgba(74,158,255,0.2);
-    background: var(--bg);
-  }
-  body.theme-ascent::after {
-    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background: radial-gradient(ellipse at 50% 0%, rgba(40,80,200,0.2) 0%, transparent 60%),
-                radial-gradient(ellipse at 80% 100%, rgba(20,60,180,0.15) 0%, transparent 50%);
-  }
-  body.theme-descent {
-    --bg: #080c14; --ink: #e8eaf0; --accent: #6070c8; --border: rgba(232,234,240,0.12);
-    background: var(--bg);
-  }
-  body.theme-descent::after {
-    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background: radial-gradient(ellipse at 30% 20%, rgba(80,90,180,0.15) 0%, transparent 60%),
-                radial-gradient(ellipse at 70% 80%, rgba(40,50,120,0.12) 0%, transparent 50%);
-  }
+  body.theme-morning { --bg: #f0e8d8; --ink: #1a1208; --accent: #c8712a; --border: rgba(60,40,10,0.2); background: var(--bg); }
+  body.theme-morning::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 110%, rgba(220,160,60,0.25) 0%, transparent 70%), radial-gradient(ellipse at 20% 80%, rgba(200,120,40,0.12) 0%, transparent 50%); }
+  body.theme-ascent { --bg: #070d1a; --ink: #e8f0ff; --accent: #4a9eff; --border: rgba(74,158,255,0.2); background: var(--bg); }
+  body.theme-ascent::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 0%, rgba(40,80,200,0.2) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(20,60,180,0.15) 0%, transparent 50%); }
+  body.theme-descent { --bg: #080c14; --ink: #e8eaf0; --accent: #6070c8; --border: rgba(232,234,240,0.12); background: var(--bg); }
+  body.theme-descent::after { content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 30% 20%, rgba(80,90,180,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(40,50,120,0.12) 0%, transparent 50%); }
 
   html, body { height: 100%; color: var(--ink); font-family: 'Cormorant Garamond', Georgia, serif; transition: background 1.2s ease; }
-
-  body::before {
-    content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  body::before { content: ''; position: fixed; inset: 0; z-index: 1; pointer-events: none;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
-    opacity: 0.5;
-  }
+    opacity: 0.5; }
 
-  .page {
-    position: relative; z-index: 2;
-    height: 100vh;
-    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-    padding: 13vh 2rem 7vh; text-align: center;
-  }
+  .page { position: relative; z-index: 2; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 13vh 2rem 7vh; text-align: center; }
 
   .brand { display:flex; flex-direction:column; align-items:center; gap:0.85rem; animation:rise 1.4s ease both; }
   .logo { display:flex; align-items:center; justify-content:center; font-size:clamp(3rem,10.5vw,5.2rem); font-weight:300; text-transform:uppercase; color:var(--ink); line-height:1; transition:color 1.2s ease; }
@@ -90,43 +61,19 @@
   .eq.active { opacity:1; }
   .eq-bar { width:2px; background:var(--accent); border-radius:2px 2px 0 0; height:3px; transition:height .09s ease, background 1.2s ease; }
 
-  .player-btn-wrap {
-    position: relative; width: 82px; height: 82px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .loading-ring {
-    position: absolute; inset: 0; border-radius: 50%;
-    border: 1.5px solid var(--border);
-    animation: ringPulse 2.2s ease-in-out infinite;
-    transition: opacity .6s ease; pointer-events: none;
-  }
-  .loading-ring::after {
-    content: ''; position: absolute; inset: 8px; border-radius: 50%;
-    border: 1px solid var(--border); opacity: 0.5;
-    animation: ringPulse 2.2s ease-in-out infinite .4s;
-  }
+  .player-btn-wrap { position: relative; width: 82px; height: 82px; display: flex; align-items: center; justify-content: center; }
+  .loading-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid var(--border); animation: ringPulse 2.2s ease-in-out infinite; transition: opacity .6s ease; pointer-events: none; }
+  .loading-ring::after { content: ''; position: absolute; inset: 8px; border-radius: 50%; border: 1px solid var(--border); opacity: 0.5; animation: ringPulse 2.2s ease-in-out infinite .4s; }
   @keyframes ringPulse { 0%,100%{transform:scale(1);opacity:.4;} 50%{transform:scale(1.08);opacity:.9;} }
   .loading-ring.hidden { opacity: 0; pointer-events: none; }
 
-  .play-btn {
-    position: absolute; width: 68px; height: 68px;
-    border-radius: 50%; border: 1.5px solid var(--ink);
-    background: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: border-color .3s, transform .3s, opacity .6s ease;
-    outline: none; -webkit-tap-highlight-color: transparent;
-    opacity: 0; pointer-events: none;
-  }
-  .play-btn::before {
-    content: ''; position: absolute; width: 82px; height: 82px; border-radius: 50%;
-    border: 1px solid var(--border); transition: border-color 1.2s ease;
-  }
+  .play-btn { position: absolute; width: 68px; height: 68px; border-radius: 50%; border: 1.5px solid var(--ink); background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: border-color .3s, transform .3s, opacity .6s ease; outline: none; -webkit-tap-highlight-color: transparent; opacity: 0; pointer-events: none; }
+  .play-btn::before { content: ''; position: absolute; width: 82px; height: 82px; border-radius: 50%; border: 1px solid var(--border); transition: border-color 1.2s ease; }
   .play-btn.ready { opacity: 1; pointer-events: all; }
   .play-btn:hover { border-color: var(--accent); transform: scale(1.04); }
-  .play-btn.playing { border-color: var(--accent); }
+  .play-btn.playing { border-color: var(--accent); opacity: 1; pointer-events: all; }
   .play-btn.playing::before { animation: breathe 2.6s ease-in-out infinite; border-color: var(--accent); opacity: 0.3; }
   @keyframes breathe { 0%,100%{transform:scale(1);opacity:.3;} 50%{transform:scale(1.14);opacity:.1;} }
-
   .icon-play { width:0; height:0; border-top:9px solid transparent; border-bottom:9px solid transparent; border-left:15px solid var(--ink); margin-left:4px; transition:border-left-color 1.2s ease; }
   .icon-pause { display:none; gap:5px; align-items:center; }
   .icon-pause span { display:block; width:3px; height:14px; background:var(--accent); border-radius:1px; }
@@ -143,14 +90,7 @@
   .ident-dot { display:inline-block; width:5px; height:5px; border-radius:50%; background:var(--accent); margin-left:.5rem; vertical-align:middle; opacity:0; transition:opacity .3s; }
   .ident-dot.speaking { opacity:1; animation:blink .6s ease-in-out infinite; }
   @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.2;} }
-
-  .loading-text { font-size:.52rem; letter-spacing:.2em; text-transform:uppercase; color:var(--ink); font-style:normal; animation:pulse 1.5s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:.4;} 50%{opacity:1;} }
-
-  .bottom-nav { display:flex; align-items:center; gap:2.5rem; animation:rise 1.4s ease .4s both; }
-  .nav-btn { font-family:'Cormorant Garamond',serif; font-size:.6rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink); opacity:0.5; background:none; border:none; cursor:pointer; padding:.4rem 0; transition:opacity .2s; outline:none; -webkit-tap-highlight-color:transparent; }
-  .nav-btn:hover { opacity:1; }
-  .nav-dot { width:3px; height:3px; border-radius:50%; background:var(--ink); opacity:0.2; }
 
   #sc-frame { position:fixed; bottom:0; left:0; width:100%; height:1px; border:none; opacity:0; pointer-events:none; z-index:1; }
 
@@ -165,34 +105,9 @@
   .panel-close { font-family:'Cormorant Garamond',serif; font-size:.52rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink); opacity:0.4; background:none; border:none; cursor:pointer; outline:none; transition:opacity .2s; }
   .panel-close:hover { opacity:0.9; }
 
-  .sched-list { display:flex; flex-direction:column; gap:0; }
-  .sched-section { margin-bottom:1.8rem; }
-  .sched-section-label { font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); margin-bottom:.8rem; opacity:0.8; }
-  .sched-row { display:flex; align-items:baseline; gap:1rem; padding:.55rem 0; border-bottom:1px solid var(--border); }
-  .sched-row:last-child { border-bottom:none; }
-  .sched-row-time { font-size:.46rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); opacity:0.35; flex-shrink:0; width:4rem; font-style:normal; }
-  .sched-past { opacity:0.3; }
-  .sched-past .sched-row-artist { text-decoration:line-through; text-decoration-color:var(--border); }
-  .sched-section-active { color:var(--accent) !important; opacity:1 !important; }
-  .sched-sc-link { color:inherit; text-decoration:none; border-bottom:1px solid transparent; transition:border-color .2s,opacity .2s; }
-  .sched-sc-link:hover { border-bottom-color:var(--accent); opacity:0.8; }
-  .sched-row-artist { font-size:.82rem; font-style:italic; color:var(--ink); flex:1; line-height:1.3; }
-  .sched-row-title { font-size:.52rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink); opacity:0.45; text-align:right; flex-shrink:0; }
-  .sched-now { font-size:.44rem; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin-left:.4rem; }
-  .sched-loading { font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); opacity:0.4; text-align:center; padding:2rem 0; animation:pulse 1.5s ease-in-out infinite; }
-
-  .about-body { font-size:clamp(.9rem,2.2vw,1.05rem); font-weight:300; line-height:1.9; color:var(--ink); opacity:0.8; font-style:italic; }
-  .about-rule { width:24px; height:1px; background:var(--accent); margin:1.4rem 0; }
-  .about-footer { font-size:.5rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink); opacity:0.4; line-height:1.8; }
-  .about-footer a { color:var(--ink); opacity:0.6; text-decoration:none; border-bottom:1px solid var(--border); }
-  .about-footer a:hover { opacity:1; }
-
   .play-btn.loading { border-color:var(--accent); opacity:0.5; pointer-events:none; }
   .play-btn.loading::before { animation:breathe 2s ease-in-out infinite; border-color:var(--accent); opacity:0.4; }
   .play-btn.loading .icon-play { opacity:0; }
-  .play-btn.tuning { border-color:var(--accent); }
-  .play-btn.tuning::before { animation:breathe 1.4s ease-in-out infinite; border-color:var(--accent); opacity:0.3; }
-  .play-btn.tuning .icon-play { border-left-color:var(--accent); opacity:0.4; }
 
   .transmission-label { margin-top:.9rem; font-size:.52rem; letter-spacing:.22em; text-transform:uppercase; color:var(--ink); opacity:0; transition:opacity .6s ease; min-height:1rem; }
   .transmission-label.visible { opacity:0.55; animation:pulse 2s ease-in-out infinite; }
@@ -245,86 +160,26 @@
   .install-step-text strong { font-style:normal; font-weight:400; color:var(--accent); }
 
   /* ── STAGE TRANSITION OVERLAY ── */
-  .stage-overlay {
-    position: fixed; inset: 0; z-index: 500;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    background: var(--bg);
-    opacity: 0; pointer-events: none;
-    transition: opacity 1.2s ease;
-  }
+  .stage-overlay { position: fixed; inset: 0; z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--bg); opacity: 0; pointer-events: none; transition: opacity 1.2s ease; cursor: pointer; }
   .stage-overlay.visible { opacity: 1; pointer-events: all; }
-
-  /* The O ring — expands from center */
-  .stage-o {
-    width: 120px; height: 120px;
-    position: relative;
-    margin-bottom: 2.5rem;
-  }
+  .stage-o { width: 120px; height: 120px; position: relative; margin-bottom: 2.5rem; }
   .stage-o svg { width: 100%; height: 100%; overflow: visible; }
-  .stage-o-ring {
-    fill: none; stroke: var(--accent);
-    stroke-linecap: round;
-    transition: stroke 1.2s ease;
-  }
+  .stage-o-ring { fill: none; stroke: var(--accent); stroke-linecap: round; transition: stroke 1.2s ease; }
   .stage-o-ring-1 { stroke-width: 3; opacity: 1; }
   .stage-o-ring-2 { stroke-width: 1.5; opacity: 0.5; }
   .stage-o-ring-3 { stroke-width: 1; opacity: 0.25; }
-
-  @keyframes oExpand {
-    from { transform: scale(0.3); opacity: 0; }
-    to   { transform: scale(1);   opacity: 1; }
-  }
-  @keyframes oPulse {
-    0%,100% { transform: scale(1); }
-    50%      { transform: scale(1.06); }
-  }
-  .stage-overlay.visible .stage-o svg {
-    animation: oExpand 0.8s cubic-bezier(.22,1,.36,1) forwards;
-  }
-  .stage-overlay.pulsing .stage-o svg {
-    animation: oPulse 1.8s ease-in-out infinite;
-  }
-
-  /* Outgoing artist — fades up and out */
-  .stage-outgoing {
-    font-size: clamp(1.1rem, 3.5vw, 1.5rem);
-    font-weight: 300; font-style: italic;
-    color: var(--ink); letter-spacing: .04em;
-    opacity: 0; transform: translateY(0);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-    min-height: 2rem; text-align: center;
-  }
+  @keyframes oExpand { from { transform: scale(0.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  @keyframes oPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+  .stage-overlay.visible .stage-o svg { animation: oExpand 0.8s cubic-bezier(.22,1,.36,1) forwards; }
+  .stage-overlay.pulsing .stage-o svg { animation: oPulse 1.8s ease-in-out infinite; }
+  .stage-outgoing { font-size: clamp(1.1rem, 3.5vw, 1.5rem); font-weight: 300; font-style: italic; color: var(--ink); letter-spacing: .04em; opacity: 0; transform: translateY(0); transition: opacity 0.7s ease, transform 0.7s ease; min-height: 2rem; text-align: center; }
   .stage-outgoing.show { opacity: 0.45; transform: translateY(0); }
   .stage-outgoing.exit { opacity: 0; transform: translateY(-18px); }
-
-  /* Divider rule */
-  .stage-rule {
-    width: 0; height: 1px; background: var(--accent);
-    margin: 1rem 0; opacity: 0.6;
-    transition: width 0.8s ease 0.3s;
-  }
+  .stage-rule { width: 0; height: 1px; background: var(--accent); margin: 1rem 0; opacity: 0.6; transition: width 0.8s ease 0.3s; }
   .stage-overlay.visible .stage-rule { width: 32px; }
-
-  /* Incoming artist — fades in from below */
-  .stage-incoming {
-    font-size: clamp(1.3rem, 4vw, 1.9rem);
-    font-weight: 300; font-style: italic;
-    color: var(--ink); letter-spacing: .04em;
-    opacity: 0; transform: translateY(16px);
-    transition: opacity 0.8s ease 0.5s, transform 0.8s ease 0.5s;
-    text-align: center;
-  }
+  .stage-incoming { font-size: clamp(1.3rem, 4vw, 1.9rem); font-weight: 300; font-style: italic; color: var(--ink); letter-spacing: .04em; opacity: 0; transform: translateY(16px); transition: opacity 0.8s ease 0.5s, transform 0.8s ease 0.5s; text-align: center; padding: 0 1.5rem; }
   .stage-incoming.show { opacity: 1; transform: translateY(0); }
-
-  /* Subtitle */
-  .stage-subtitle {
-    font-size: .52rem; letter-spacing: .24em;
-    text-transform: uppercase; color: var(--ink);
-    opacity: 0; margin-top: .6rem;
-    transition: opacity 0.6s ease 0.9s;
-    text-align: center;
-  }
+  .stage-subtitle { font-size: .52rem; letter-spacing: .24em; text-transform: uppercase; color: var(--ink); opacity: 0; margin-top: .6rem; transition: opacity 0.6s ease 0.9s; text-align: center; }
   .stage-subtitle.show { opacity: 0.45; }
 
   @keyframes rise { from{opacity:0;transform:translateY(9px);} to{opacity:1;transform:translateY(0);} }
@@ -385,19 +240,13 @@
 
   <div class="schedule">
     <div class="sched-item" id="slot-day" onclick="openPopup('day')">
-      <div class="sched-time">7AM – 12PM</div>
-      <div class="sched-genre">Morning Drift</div>
-      <div class="sched-hint"></div>
+      <div class="sched-time">7AM – 12PM</div><div class="sched-genre">Morning Drift</div><div class="sched-hint"></div>
     </div>
     <div class="sched-item" id="slot-evening" onclick="openPopup('evening')">
-      <div class="sched-time">12PM – 2AM</div>
-      <div class="sched-genre">The Ascent</div>
-      <div class="sched-hint"></div>
+      <div class="sched-time">12PM – 2AM</div><div class="sched-genre">The Ascent</div><div class="sched-hint"></div>
     </div>
     <div class="sched-item" id="slot-night" onclick="openPopup('night')">
-      <div class="sched-time">2AM – 7AM</div>
-      <div class="sched-genre">The Descent</div>
-      <div class="sched-hint"></div>
+      <div class="sched-time">2AM – 7AM</div><div class="sched-genre">The Descent</div><div class="sched-hint"></div>
     </div>
   </div>
 </div>
@@ -436,8 +285,6 @@
   <span class="install-banner-icon">⊕</span>
   <span class="install-banner-text">Add to Home Screen</span>
 </div>
-
-<!-- INSTALL PANEL -->
 <div class="panel-overlay" id="panel-install" onclick="handlePanelClick(event,'install')">
   <div class="panel-backdrop"></div>
   <div class="panel">
@@ -451,14 +298,43 @@
 
 <script src="https://w.soundcloud.com/player/api.js"></script>
 <script>
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+// ─────────────────────────────────────────────
+// URL FLAGS — inert unless added to the address
+//   ?debug               on-screen event log
+//   ?testboundary=2      force a slot change 2 min after load
+//   ?testmix=30          simulate end of current mix 30 s after play starts
+// ─────────────────────────────────────────────
+var QS = location.search;
+var DEBUG = /[?&]debug\b/.test(QS);
+var TEST_BOUNDARY_MS = (function(){ var m = QS.match(/[?&]testboundary=(\d+)/); return m ? parseInt(m[1],10)*60000 : 0; })();
+var TEST_MIX_SEC = (function(){ var m = QS.match(/[?&]testmix=(\d+)/); return m ? parseInt(m[1],10) : 0; })();
+var _dbgEl = null, _testMixArmed = false;
+function dlog(msg) {
+  try { console.log('Flora:', msg); } catch(e) {}
+  if (!DEBUG) return;
+  if (!_dbgEl) {
+    _dbgEl = document.createElement('div');
+    _dbgEl.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:rgba(0,0,0,.85);color:#00ff88;font:11px/1.4 monospace;padding:6px 10px;pointer-events:none;';
+    document.body.appendChild(_dbgEl);
+  }
+  var line = document.createElement('div');
+  line.textContent = new Date().toLocaleTimeString() + '  ' + msg;
+  _dbgEl.insertBefore(line, _dbgEl.firstChild);
+  while (_dbgEl.childNodes.length > 8) _dbgEl.removeChild(_dbgEl.lastChild);
+}
 
-// ── THEME ──
-const themes = { 'Morning':'theme-morning','Afternoon':'theme-ascent','Late Night':'theme-descent' };
+// ─────────────────────────────────────────────
+// THEME / SLOTS
+// ─────────────────────────────────────────────
+const themes = { 'Morning':'theme-morning', 'Afternoon':'theme-ascent', 'Late Night':'theme-descent' };
+var SLOT_INFO = {
+  'Morning':    { name:'Morning Drift', time:'7AM – 12PM',  genre:'Deep house · Afro',  el:'slot-day' },
+  'Afternoon':  { name:'The Ascent',    time:'12PM – 2AM',  genre:'House · Techno',     el:'slot-evening' },
+  'Late Night': { name:'The Descent',   time:'2AM – 7AM',   genre:'Dark · Minimal',     el:'slot-night' }
+};
+function nextBucketAfter(b) { return b === 'Morning' ? 'Afternoon' : (b === 'Afternoon' ? 'Late Night' : 'Morning'); }
 function applyTheme(bucket) {
-  var current = document.body.className;
-  var nonTheme = current.split(' ').filter(c => c && !c.startsWith('theme-')).join(' ');
+  var nonTheme = document.body.className.split(' ').filter(function(c){ return c && !c.startsWith('theme-'); }).join(' ');
   var theme = themes[bucket] || 'theme-morning';
   document.body.className = nonTheme ? theme + ' ' + nonTheme : theme;
 }
@@ -468,8 +344,14 @@ function getCurrentBucket() {
   if (h >= 2 && h < 7)  return 'Late Night';
   return 'Afternoon';
 }
+function highlightSlot(bucket) {
+  bucket = bucket || getCurrentBucket();
+  applyTheme(bucket);
+  document.querySelectorAll('.sched-item').forEach(function(el){ el.classList.remove('now-slot'); });
+  var el = document.getElementById(SLOT_INFO[bucket].el);
+  if (el) el.classList.add('now-slot');
+}
 
-// ── SLOT POPUPS ──
 const slotPopups = {
   day:     { time:'7AM – 12PM',  title:'Morning Drift', body:'A morning selection of deep house, afro house, and organic electronica. Curated to ease you into your day with warm, textured sounds and a steady, unhurried groove.' },
   evening: { time:'12PM – 2AM', title:'The Ascent',    body:'A continuous programme of house, tech house, progressive, and Chicago-influenced sets. Designed to build energy and elevate your mood through the afternoon and into the night.' },
@@ -485,48 +367,40 @@ function openPopup(s) {
   document.body.style.overflow = 'hidden';
 }
 function closePopup() { overlayEl.classList.remove('open'); document.body.style.overflow = ''; }
-function handleOverlayClick(e) {
-  if (e.target === overlayEl || e.target.classList.contains('overlay-backdrop')) closePopup();
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closePopup(); });
-function highlightSlot() {
-  applyTheme(getCurrentBucket());
-  document.querySelectorAll('.sched-item').forEach(el => el.classList.remove('now-slot'));
-  const map = { 'Morning':'slot-day','Afternoon':'slot-evening','Late Night':'slot-night' };
-  const el = document.getElementById(map[getCurrentBucket()]);
-  if (el) el.classList.add('now-slot');
-}
+function handleOverlayClick(e) { if (e.target === overlayEl || e.target.classList.contains('overlay-backdrop')) closePopup(); }
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closePopup(); });
 
-// ── SEEDED SHUFFLE ──
-function seededRandom(seed) { let s=seed; return ()=>{ s=(s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; }; }
-function getDailySeed() { const d=new Date(); return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
+// ─────────────────────────────────────────────
+// SHUFFLE / CLOCK SYNC (used when a listener joins)
+// ─────────────────────────────────────────────
+function seededRandom(seed) { let s = seed; return function(){ s = (s*1664525+1013904223)&0xffffffff; return (s>>>0)/0xffffffff; }; }
+function getDailySeed() { const d = new Date(); return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate(); }
 function shuffleWithSeed(arr, seed) {
-  const rng=seededRandom(seed), a=[...arr];
-  for (let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  const rng = seededRandom(seed), a = [...arr];
+  for (let i = a.length-1; i > 0; i--) { const j = Math.floor(rng()*(i+1)); [a[i],a[j]] = [a[j],a[i]]; }
   return a;
 }
-
-// ── SYNC ENGINE ──
-function getSyncPosition(tracks) {
-  const now=new Date(), midnight=new Date(now);
+function getSyncPosition(list) {
+  const now = new Date(), midnight = new Date(now);
   midnight.setHours(0,0,0,0);
-  const secondsToday=Math.floor((now-midnight)/1000);
-  const totalDuration=tracks.reduce((sum,t)=>sum+(t.duration*60),0);
-  if (!totalDuration) return {index:0,offsetSeconds:0};
-  const pos=secondsToday%totalDuration;
-  let elapsed=0;
-  for (let i=0;i<tracks.length;i++){
-    const dur=tracks[i].duration*60;
-    if (pos<elapsed+dur) return {index:i,offsetSeconds:Math.floor(pos-elapsed)};
-    elapsed+=dur;
+  const secondsToday = Math.floor((now-midnight)/1000);
+  const total = list.reduce(function(sum,t){ return sum + t.duration*60; }, 0);
+  if (!total) return { index:0, offsetSeconds:0 };
+  const pos = secondsToday % total;
+  let elapsed = 0;
+  for (let i = 0; i < list.length; i++) {
+    const dur = list[i].duration*60;
+    if (pos < elapsed+dur) return { index:i, offsetSeconds:Math.floor(pos-elapsed) };
+    elapsed += dur;
   }
-  return {index:0,offsetSeconds:0};
+  return { index:0, offsetSeconds:0 };
 }
-function formatTime(s) { const m=Math.floor(s/60),sec=Math.floor(s%60); return m+':'+sec.toString().padStart(2,'0'); }
 
-// ── FETCH LIBRARY ──
-let tracks=[],currentIndex=0,startOffset=0,libraryLoaded=false;
-let _fetchPromise=null, _targetBucket=null;
+// ─────────────────────────────────────────────
+// LIBRARY
+// ─────────────────────────────────────────────
+let tracks = [], currentIndex = 0, startOffset = 0, libraryLoaded = false;
+let _fetchPromise = null, _targetBucket = null;
 async function fetchLibrary(forceBucket) {
   if (forceBucket) _targetBucket = forceBucket;
   if (libraryLoaded && tracks.length && !forceBucket) return true;
@@ -538,408 +412,470 @@ async function _doFetch() {
   try {
     var bucket = _targetBucket || getCurrentBucket();
     _targetBucket = null;
-    const res  = await fetch('/api/library?bucket='+encodeURIComponent(bucket));
+    const res  = await fetch('/api/library?bucket=' + encodeURIComponent(bucket));
     const data = await res.json();
-    if (!data.records||!data.records.length) return false;
-    const raw = data.records.map(r=>({
-      url:r.fields.SoundCloud_URL||'', title:r.fields.Title||'Unknown Mix',
-      artist:r.fields.Artist||'Unknown Artist', year:r.fields.Year||'',
-      event:r.fields.Event||'', artistSC:r.fields.Artist_SoundCloud||'#',
-      duration:parseFloat(r.fields.Duration)||60,
-    })).filter(t=>t.url);
+    if (!data.records || !data.records.length) return false;
+    const raw = data.records.map(function(r){ return {
+      url: r.fields.SoundCloud_URL || '', title: r.fields.Title || 'Unknown Mix',
+      artist: r.fields.Artist || 'Unknown Artist', year: r.fields.Year || '',
+      event: r.fields.Event || '', artistSC: r.fields.Artist_SoundCloud || '#',
+      duration: parseFloat(r.fields.Duration) || 60
+    }; }).filter(function(t){ return t.url; });
     tracks = shuffleWithSeed(raw, getDailySeed());
     const sync = getSyncPosition(tracks);
     currentIndex = sync.index; startOffset = sync.offsetSeconds;
     libraryLoaded = true;
     return true;
-  } catch(e){console.error(e);_fetchPromise=null;return false;}
+  } catch(e) { console.error(e); _fetchPromise = null; return false; }
 }
 
-// ── VOICE ──
-const IDENT_MS=20*60*1000;
-let identTimer=null, isSpeaking=false;
-const dot=document.getElementById('identDot');
-let _selectedVoice=null;
+// ─────────────────────────────────────────────
+// VOICE (periodic artist callout)
+// ─────────────────────────────────────────────
+const IDENT_MS = 20*60*1000;
+let identTimer = null, isSpeaking = false;
+const dot = document.getElementById('identDot');
+let _selectedVoice = null;
 function loadVoice() {
-  const voices=window.speechSynthesis.getVoices();
-  const preferred=['Google UK English Female','Microsoft Sonia Online (Natural) - English (United Kingdom)','Microsoft Libby Online (Natural) - English (United Kingdom)','Martha','Serena','Kate'];
-  for (const name of preferred) { const m=voices.find(v=>v.name===name); if(m){_selectedVoice=m;return;} }
-  _selectedVoice=voices.find(v=>v.lang==='en-GB')||voices.find(v=>v.lang.startsWith('en'))||null;
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = ['Google UK English Female','Microsoft Sonia Online (Natural) - English (United Kingdom)','Microsoft Libby Online (Natural) - English (United Kingdom)','Martha','Serena','Kate'];
+  for (const name of preferred) { const m = voices.find(function(v){ return v.name === name; }); if (m) { _selectedVoice = m; return; } }
+  _selectedVoice = voices.find(function(v){ return v.lang === 'en-GB'; }) || voices.find(function(v){ return v.lang.startsWith('en'); }) || null;
 }
-function applyVoice(u){u.rate=1.0;u.pitch=1.1;u.volume=1;if(_selectedVoice)u.voice=_selectedVoice;}
-function setVol(v){if(widget)widget.setVolume(v);}
-function ramp(from,to,ms,done){
-  const steps=20,st=ms/steps,ss=(to-from)/steps;let cur=from,cnt=0;
-  const iv=setInterval(()=>{cur+=ss;cnt++;setVol(Math.round(Math.max(0,Math.min(100,cur))));if(cnt>=steps){clearInterval(iv);if(done)done();}},st);
+function applyVoice(u) { u.rate = 1.0; u.pitch = 1.1; u.volume = 1; if (_selectedVoice) u.voice = _selectedVoice; }
+function setVol(v) { try { if (widget) widget.setVolume(v); } catch(e) {} }
+function ramp(from, to, ms, done) {
+  const steps = 20, st = ms/steps, ss = (to-from)/steps; let cur = from, cnt = 0;
+  const iv = setInterval(function(){
+    cur += ss; cnt++; setVol(Math.round(Math.max(0, Math.min(100, cur))));
+    if (cnt >= steps) { clearInterval(iv); if (done) done(); }
+  }, st);
 }
-function getSpanishVoice(){return window.speechSynthesis.getVoices().find(v=>v.lang==='es-MX'||v.lang==='es-US'||v.lang.startsWith('es'))||null;}
-function speakChunks(chunks,onDone){
-  if(!chunks.length){isSpeaking=false;dot.classList.remove('speaking');ramp(18,100,900,onDone);return;}
-  const chunk=chunks[0],rest=chunks.slice(1);
-  const u=new SpeechSynthesisUtterance(chunk.text);
-  var isSpanish=/[áéíóúüñ¿¡]/i.test(chunk.text)||chunk.text.toLowerCase().includes('escuchando');
-  if(isSpanish){var esVoice=getSpanishVoice();if(esVoice){u.voice=esVoice;u.lang=esVoice.lang;u.rate=1.0;u.pitch=1.1;u.volume=1;}else applyVoice(u);}
-  else applyVoice(u);
-  u.onend=()=>setTimeout(()=>speakChunks(rest,onDone),chunk.pause||200);
-  u.onerror=()=>{setVol(100);isSpeaking=false;dot.classList.remove('speaking');if(onDone)onDone();};
+function speakChunks(chunks, onDone) {
+  if (!chunks.length) { isSpeaking = false; dot.classList.remove('speaking'); ramp(18,100,900,onDone); return; }
+  const chunk = chunks[0], rest = chunks.slice(1);
+  const u = new SpeechSynthesisUtterance(chunk.text);
+  applyVoice(u);
+  u.onend = function(){ setTimeout(function(){ speakChunks(rest, onDone); }, chunk.pause || 200); };
+  u.onerror = function(){ setVol(100); isSpeaking = false; dot.classList.remove('speaking'); if (onDone) onDone(); };
   window.speechSynthesis.speak(u);
 }
-function speak(chunks,onDone){
-  if(!window.speechSynthesis||isSpeaking){if(onDone)onDone();return;}
-  if(typeof chunks==='string') chunks=[{text:chunks,pause:0}];
-  isSpeaking=true;dot.classList.add('speaking');
-  ramp(100,18,700,()=>speakChunks(chunks,onDone));
+function speak(chunks, onDone) {
+  if (!window.speechSynthesis || isSpeaking) { if (onDone) onDone(); return; }
+  isSpeaking = true; dot.classList.add('speaking');
+  ramp(100, 18, 700, function(){ speakChunks(chunks, onDone); });
 }
-function artistCallout(){
-  if(!playing||!tracks.length) return;
-  const t=tracks[currentIndex];
+function artistCallout() {
+  if (!playing || appState !== 'playing' || playerMode !== 'mix' || transitioning || !tracks.length) return;
+  const t = tracks[currentIndex];
   speak([{text:'Flora Radio.',pause:320},{text:t.artist+'.',pause:220},{text:t.event+'.',pause:220},{text:String(t.year)+'.',pause:0}]);
 }
-function scheduleCallouts(){clearInterval(identTimer);identTimer=setInterval(()=>{if(playing)artistCallout();},IDENT_MS);}
+function scheduleCallouts() { clearInterval(identTimer); identTimer = setInterval(artistCallout, IDENT_MS); }
 
-// ── STATION IDENT ──
+// ─────────────────────────────────────────────
+// PLAYER ENGINE
+//
+// ONE SoundCloud player lives for the whole session. New mixes and the
+// station ident are swapped into it with widget.load(), so the browser
+// never sees a brand-new player that has to earn permission to play.
+// If the browser still refuses to start audio on its own, Flora shows a
+// "Tap to continue" prompt instead of leaving dead air.
+// ─────────────────────────────────────────────
 var IDENT_SC_URL = 'https://soundcloud.com/brad-clarkson-421298152/floraradio-pulse-mp3';
-var identPlaying = false;
-function stationIdent(cb){
-  if(!IDENT_SC_URL||IDENT_SC_URL==='YOUR_SOUNDCLOUD_IDENT_URL_HERE'){
-    speakTransition(getCurrentBucket(),cb); return;
+var SC_OPTS = '&buying=false&liking=false&download=false&sharing=false&show_artwork=false&show_comments=false&show_playcount=false&show_user=false&hide_related=true&visual=false&color=%23c8503a';
+
+let widget = null, playing = false, eqTimer = null;
+let playerCreated = false, playerMode = 'mix';        // 'mix' | 'ident'
+let afterIdent = null, transitioning = false, internalPause = false;
+let gotPlay = false, lastFinishAt = 0, errorStreak = 0, lastPos = -1, stallCount = 0;
+let playWatchTimer = null, identSafetyTimer = null, watchdogTimer = null, boundaryTimer = null;
+let appState = 'loading';
+let lastBucket = getCurrentBucket();
+
+const btn  = document.getElementById('playBtn');
+const eq   = document.getElementById('eq');
+const np   = document.getElementById('nowPlaying');
+const bars = document.querySelectorAll('.eq-bar');
+const enteringEl = document.getElementById('transmissionLabel');
+const hintEl     = document.getElementById('tapLabel');
+
+function bindPlayerEvents() {
+  var E = SC.Widget.Events;
+  [E.PLAY, E.PAUSE, E.FINISH, E.ERROR].forEach(function(e){ try { widget.unbind(e); } catch(x) {} });
+  widget.bind(E.PLAY, onPlayerPlay);
+  widget.bind(E.PAUSE, onPlayerPause);
+  widget.bind(E.FINISH, onPlayerFinish);
+  widget.bind(E.ERROR, onPlayerError);
+}
+
+// Load a SoundCloud URL into the single player. done() runs once it is ready.
+function playerLoad(url, offsetSecs, autoplay, done) {
+  gotPlay = false; lastPos = -1; stallCount = 0;
+  internalPause = true; setTimeout(function(){ internalPause = false; }, 2500);
+  var fired = false, guard = null;
+  function finishLoad() {
+    if (fired) return; fired = true; clearTimeout(guard);
+    try { bindPlayerEvents(); } catch(e) {}
+    if (offsetSecs > 0) { try { widget.seekTo(offsetSecs*1000); } catch(e) {} }
+    if (done) done();
   }
-  playIdentTrack(cb);
+  guard = setTimeout(function(){ dlog('load callback timed out — continuing'); finishLoad(); }, 12000);
+  var frame = document.getElementById('sc-frame');
+  if (!playerCreated) {
+    frame.src = 'https://w.soundcloud.com/player/?url=' + encodeURIComponent(url) + '&auto_play=' + (autoplay ? 'true' : 'false') + SC_OPTS;
+    widget = SC.Widget(frame); playerCreated = true;
+    widget.bind(SC.Widget.Events.READY, function(){ try { widget.unbind(SC.Widget.Events.READY); } catch(e) {} finishLoad(); });
+  } else {
+    try { bindPlayerEvents(); } catch(e) {}
+    widget.load(url, { auto_play: autoplay, buying:false, liking:false, download:false, sharing:false, show_artwork:false, show_comments:false, show_playcount:false, show_user:false, hide_related:true, visual:false, color:'#c8503a', callback: finishLoad });
+  }
 }
-function playIdentTrack(cb){
-  identPlaying=true;
-  var frame=document.getElementById('sc-frame');
-  frame.src='https://w.soundcloud.com/player/?url='+encodeURIComponent(IDENT_SC_URL)+
-    '&auto_play=true&buying=false&liking=false&download=false&sharing=false'+
-    '&show_artwork=false&show_comments=false&show_playcount=false'+
-    '&show_user=false&hide_related=true&visual=false&color=%23c8503a';
-  widget=SC.Widget(frame); widgetReady=false;
-  var safetyTimer=setTimeout(function(){identPlaying=false;widgetReady=false;if(cb)cb();},3*60*1000);
-  widget.bind(SC.Widget.Events.READY,function(){widgetReady=true;});
-  widget.bind(SC.Widget.Events.FINISH,function(){
-    clearTimeout(safetyTimer);identPlaying=false;widgetReady=false;
-    setTimeout(function(){if(cb)cb();},500);
-  });
-  widget.bind(SC.Widget.Events.ERROR,function(){
-    clearTimeout(safetyTimer);identPlaying=false;widgetReady=false;
-    console.warn('Flora: ident error');if(cb)cb();
+
+// ── player events ──
+function onPlayerPlay() {
+  gotPlay = true; errorStreak = 0; clearTimeout(playWatchTimer);
+  dlog('PLAY (' + playerMode + ')');
+  if (appState === 'paused' || appState === 'ready') setAppState('playing');   // e.g. resumed from the lock screen
+}
+function onPlayerPause() {
+  dlog('PAUSE (' + playerMode + ')');
+  if (internalPause) return;
+  setTimeout(function(){
+    if (internalPause || appState !== 'playing') return;
+    if (Date.now() - lastFinishAt < 3000) return;     // that was just the mix ending
+    dlog('paused from outside Flora');
+    setAppState('paused');
+  }, 700);
+}
+function onPlayerFinish() {
+  lastFinishAt = Date.now();
+  dlog('FINISH (' + playerMode + ')');
+  if (!playing) return;
+  if (playerMode === 'ident') { identDone(); return; }
+  if (transitioning) return;
+  mixEnded();
+}
+function onPlayerError() {
+  dlog('ERROR (' + playerMode + ')');
+  errorStreak++;
+  if (playerMode === 'ident') { if (playing) identDone(); return; }
+  if (errorStreak >= 4) { dlog('too many errors in a row'); promptTap('Tap to retry'); return; }
+  // A mix that was removed or blocked: move on to the next one.
+  currentIndex = (currentIndex + 1) % tracks.length;
+  var t = tracks[currentIndex];
+  if (playing && appState === 'playing') { startMix(currentIndex, 0); }
+  else {
+    loadedSilently(t, 0);
+  }
+}
+function loadedSilently(t, offset) {      // pre-load a mix without playing it
+  playerMode = 'mix';
+  playerLoad(t.url, offset, false, function(){
+    updateNowPlaying(t, offset);
+    if (appState === 'loading') setAppState('ready');
   });
 }
 
-// ── TRANSITION SPEECH ──
-var lastBucket=getCurrentBucket();
-function speakTransition(bucket,cb){
-  var scripts={
-    'Morning':[{text:'Flora Radio.',pause:340},{text:'A new day begins.',pause:300},{text:'You are now entering Morning Drift.',pause:320},{text:'Warm, unhurried, and deep.',pause:0}],
-    'Afternoon':[{text:'Flora Radio.',pause:340},{text:'The energy is building.',pause:280},{text:'You are now entering The Ascent.',pause:320},{text:'Peak time house and techno.',pause:240},{text:'For the hours ahead.',pause:0}],
-    'Late Night':[{text:'Flora Radio.',pause:340},{text:'You are now entering The Descent.',pause:320},{text:'Minimal, dark, and hypnotic.',pause:260},{text:'Music for the deep hours.',pause:0}]
-  };
-  speak(scripts[bucket]||scripts['Afternoon'],cb);
+// If audio hasn't actually started a few seconds after an automatic load,
+// ask the listener for a tap instead of leaving silence.
+function watchForPlayback(label) {
+  clearTimeout(playWatchTimer);
+  playWatchTimer = setTimeout(function(){
+    if (gotPlay || !playing || appState !== 'playing' || !widget) return;
+    widget.getPosition(function(p1){
+      setTimeout(function(){
+        widget.getPosition(function(p2){
+          if (p2 - p1 > 500) { gotPlay = true; return; }      // it is playing after all
+          dlog('audio did not start by itself — asking for a tap');
+          promptTap(label || 'Tap to continue');
+        });
+      }, 1500);
+    });
+  }, 9000);
+}
+function promptTap(label) {
+  hideStage();
+  eq.classList.remove('active'); clearTimeout(eqTimer);
+  setAppState('ready', label);
 }
 
-// ── TRANSITION AUDIO ──
-var TRANSITION_AUDIO='/audio/floraradio-pulse.mp3';
-var _preloadedAudio=null;
-(function(){try{_preloadedAudio=new Audio(TRANSITION_AUDIO);_preloadedAudio.load();}catch(e){}})();
-function playTransitionAudio(bucket,onDone){
-  var done=false;
-  function finish(){if(done)return;done=true;if(onDone)onDone();}
-  var safetyTimer=setTimeout(finish,35000);
-  var audio=_preloadedAudio||new Audio(TRANSITION_AUDIO);
-  _preloadedAudio=null;
-  audio.oncanplaythrough=function(){
-    audio.play().then(function(){audio.onended=function(){clearTimeout(safetyTimer);finish();};})
-    .catch(function(){clearTimeout(safetyTimer);isSpeaking=false;speakTransition(bucket,finish);});
-  };
-  audio.onerror=function(){clearTimeout(safetyTimer);isSpeaking=false;speakTransition(bucket,finish);};
-  setTimeout(function(){if(!done&&audio.readyState<3){clearTimeout(safetyTimer);isSpeaking=false;speakTransition(bucket,finish);}},5000);
-  audio.load();
+// ── station ident (SoundCloud track, plays inside the same player) ──
+function playIdent(next) {
+  playerMode = 'ident'; afterIdent = next;
+  dlog('loading ident');
+  playerLoad(IDENT_SC_URL, 0, true, function(){ setVol(100); });
+  watchForPlayback('Tap to continue');
+  clearTimeout(identSafetyTimer);
+  identSafetyTimer = setTimeout(function(){
+    if (playerMode === 'ident' && appState === 'playing') { dlog('ident safety timeout'); identDone(); }
+  }, 90000);
+}
+function identDone() {
+  clearTimeout(identSafetyTimer);
+  var f = afterIdent; afterIdent = null;
+  if (f) f();
+}
+
+// ── mixes ──
+function startMix(index, offset) {
+  playerMode = 'mix'; currentIndex = index;
+  var t = tracks[index];
+  dlog('starting mix: ' + t.artist);
+  transitioning = false;
+  playerLoad(t.url, offset, true, function(){ setVol(100); updateNowPlaying(t, offset); });
+  watchForPlayback('Tap to continue');
+}
+function mixEnded() {
+  if (transitioning || !tracks.length) return;
+  transitioning = true;
+  clearInterval(identTimer); isSpeaking = false; window.speechSynthesis.cancel();
+  var out = tracks[currentIndex];
+  var nextIndex = (currentIndex + 1) % tracks.length;
+  var inT = tracks[nextIndex];
+  dlog('mix ended → ' + inT.artist);
+  showStage({ outText: out ? out.artist : '', inText: inT.artist, subText: [inT.event, inT.year].filter(Boolean).join(' · '), hold: 6500 });
+  updateNowPlaying(inT, 0);
+  playIdent(function(){ startMix(nextIndex, 0); scheduleCallouts(); });
+}
+
+// ── watchdog: notices a stalled player, or a pause Flora never heard about ──
+function startWatchdog() { clearInterval(watchdogTimer); watchdogTimer = setInterval(watchdogTick, 15000); }
+function stopWatchdog()  { clearInterval(watchdogTimer); }
+function watchdogTick() {
+  if (!playing || appState !== 'playing' || transitioning || !widget) return;
+  widget.getPosition(function(pos){
+    widget.getDuration(function(dur){
+      var moved = Math.abs(pos - lastPos) >= 500; lastPos = pos;
+      if (moved) { stallCount = 0; return; }
+      stallCount++;
+      var nearEnd = dur > 0 && (dur - pos) < 5000;
+      dlog('watchdog: no movement (' + stallCount + ')');
+      if (stallCount < 2 && !nearEnd) return;
+      widget.isPaused(function(paused){
+        stallCount = 0;
+        if (paused && !nearEnd) { dlog('watchdog: player is paused outside Flora'); setAppState('paused'); return; }
+        dlog('watchdog: moving on');
+        mixEnded();
+      });
+    });
+  });
 }
 
 // ─────────────────────────────────────────────
-// STAGE TRANSITION ANIMATION
+// STAGE ANIMATION
 // ─────────────────────────────────────────────
-var stageOverlay    = document.getElementById('stageOverlay');
-var stageOutgoing   = document.getElementById('stageOutgoing');
-var stageIncoming   = document.getElementById('stageIncoming');
-var stageSubtitle   = document.getElementById('stageSubtitle');
-var stageRule       = document.getElementById('stageRule');
-var stageAnimTimer  = null;
-
-function showStageTransition(outArtist, inTrack, onDone) {
-  // Reset state
-  stageOutgoing.className  = 'stage-outgoing';
-  stageIncoming.className  = 'stage-incoming';
-  stageSubtitle.className  = 'stage-subtitle';
-  stageOverlay.classList.remove('pulsing');
-
-  // Set content
-  stageOutgoing.textContent = outArtist || '';
-  stageIncoming.textContent = inTrack ? inTrack.artist : '';
-  stageSubtitle.textContent = inTrack ? [(inTrack.event||''), (inTrack.year||'')].filter(Boolean).join(' · ') : '';
-
-  // Step 1 — fade in overlay + show outgoing artist
+var stageOverlay  = document.getElementById('stageOverlay');
+var stageOutgoing = document.getElementById('stageOutgoing');
+var stageIncoming = document.getElementById('stageIncoming');
+var stageSubtitle = document.getElementById('stageSubtitle');
+var stageTimers = [];
+function stageAt(ms, fn) { stageTimers.push(setTimeout(fn, ms)); }
+function hideStage() {
+  stageTimers.forEach(clearTimeout); stageTimers = [];
+  stageOverlay.classList.remove('visible', 'pulsing');
+}
+function showStage(o) {
+  hideStage();
+  stageOutgoing.className = 'stage-outgoing';
+  stageIncoming.className = 'stage-incoming';
+  stageSubtitle.className = 'stage-subtitle';
+  stageOutgoing.textContent = o.outText || '';
+  stageIncoming.textContent = o.inText || '';
+  stageSubtitle.textContent = o.subText || '';
   stageOverlay.classList.add('visible');
-  setTimeout(function() { stageOutgoing.classList.add('show'); }, 300);
-
-  // Step 2 — outgoing fades up and out
-  setTimeout(function() { stageOutgoing.classList.add('exit'); }, 1400);
-
-  // Step 3 — O pulses alone
-  setTimeout(function() { stageOverlay.classList.add('pulsing'); }, 1800);
-
-  // Step 4 — incoming artist fades in from below
-  setTimeout(function() {
-    stageIncoming.classList.add('show');
-    stageSubtitle.classList.add('show');
-  }, 2600);
-
-  // Step 5 — hold, then fade out
-  setTimeout(function() {
-    stageOverlay.classList.remove('visible','pulsing');
-    setTimeout(function() {
-      if (onDone) onDone();
-    }, 1200); // wait for fade-out
-  }, 5800);
+  stageAt(300,  function(){ stageOutgoing.classList.add('show'); });
+  stageAt(1400, function(){ stageOutgoing.classList.add('exit'); });
+  stageAt(1800, function(){ stageOverlay.classList.add('pulsing'); });
+  stageAt(2600, function(){ stageIncoming.classList.add('show'); stageSubtitle.classList.add('show'); });
+  stageAt(o.hold || 6500, hideStage);
 }
+// Tapping the overlay dismisses it, and doubles as a user gesture that can unlock audio.
+stageOverlay.addEventListener('click', function(){
+  hideStage();
+  if (playing && !gotPlay && widget) { try { widget.play(); } catch(e) {} }
+});
 
-// Between-mix transition — show stage animation then play ident
-function mixTransition(outArtist, inTrack, onDone) {
-  showStageTransition(outArtist, inTrack, function() {
-    stationIdent(onDone);
-  });
-}
-
-// ── SLOT BOUNDARY ──
-var transitioning=false, boundaryTimer=null;
-function getMsUntilNextBoundary(){
-  var now=new Date(),h=now.getHours(),m=now.getMinutes(),s=now.getSeconds(),ms=now.getMilliseconds();
-  var nowMs=((h*3600)+(m*60)+s)*1000+ms;
-  var boundaries=[7*3600*1000,12*3600*1000,26*3600*1000];
-  var dayMs=24*3600*1000,next=null;
-  for(var i=0;i<boundaries.length;i++){
-    var b=boundaries[i]%dayMs,diff=b-nowMs;
-    if(diff<0)diff+=dayMs;
-    if(next===null||diff<next)next=diff;
+// ─────────────────────────────────────────────
+// SLOT CHANGES (7AM / 12PM / 2AM)
+// ─────────────────────────────────────────────
+function getMsUntilNextBoundary() {
+  var now = new Date();
+  var nowMs = ((now.getHours()*3600) + (now.getMinutes()*60) + now.getSeconds())*1000 + now.getMilliseconds();
+  var boundaries = [7*3600*1000, 12*3600*1000, 26*3600*1000];
+  var dayMs = 24*3600*1000, next = null;
+  for (var i = 0; i < boundaries.length; i++) {
+    var diff = (boundaries[i] % dayMs) - nowMs;
+    if (diff <= 1000) diff += dayMs;
+    if (next === null || diff < next) next = diff;
   }
   return next;
 }
-
-function doTransition(newBucket){
-  applyTheme(newBucket);
-  highlightSlot();
-  playTransitionAudio(newBucket,function(){
-    tracks=[];libraryLoaded=false;_fetchPromise=null;
-    fetchLibrary(newBucket).then(function(ok){
-      transitioning=false;setVol(100);
-      if(!ok||!tracks.length){scheduleBoundaryTransition();return;}
-      currentIndex=0;loadedTrackUrl=null;
-      loadTrack(tracks[currentIndex],0,true);
-      scheduleCallouts();startSyncTimer();scheduleBoundaryTransition();
-    }).catch(function(){transitioning=false;setVol(100);scheduleBoundaryTransition();});
-  });
-}
-
-function scheduleBoundaryTransition(){
+function scheduleBoundaryTransition() {
   clearTimeout(boundaryTimer);
-  var msUntil=getMsUntilNextBoundary();
-  console.log('Flora: next boundary in',Math.round(msUntil/1000/60),'minutes');
-  boundaryTimer=setTimeout(function(){
-    if(!playing){scheduleBoundaryTransition();return;}
-    var newBucket=getCurrentBucket();
-    transitioning=true;lastBucket=newBucket;
-    isSpeaking=false;window.speechSynthesis.cancel();clearInterval(identTimer);stopSyncTimer();
-    if(widget){try{widget.setVolume(0);}catch(e){}setTimeout(function(){try{widget.pause();}catch(e){}},8000);}
-    ramp(100,0,8000,function(){if(widget){try{widget.pause();}catch(e){}};doTransition(newBucket);});
-    setTimeout(function(){
-      if(!transitioning)return;
-      if(widget){try{widget.pause();}catch(e){}}
-      setVol(0);if(transitioning)doTransition(newBucket);transitioning=false;
-    },10000);
-  },msUntil);
+  var test = TEST_BOUNDARY_MS; TEST_BOUNDARY_MS = 0;
+  var ms = test || getMsUntilNextBoundary();
+  dlog('next slot change in ' + Math.round(ms/1000) + 's');
+  boundaryTimer = setTimeout(function(){ fireBoundary(test, 0); }, ms);
 }
-
-function startSlotMonitor(){}
-var slotMonitorTimer=null;
-
-// ── SOUNDCLOUD ENGINE ──
-let widget=null,playing=false,eqTimer=null;
-let loadedTrackUrl=null,syncCheckTimer=null;
-const btn=document.getElementById('playBtn');
-const eq=document.getElementById('eq');
-const np=document.getElementById('nowPlaying');
-const bars=document.querySelectorAll('.eq-bar');
-
-function loadTrack(track,offsetSecs,autoplay){
-  widgetReady=false;loadedTrackUrl=track.url;
-  const frame=document.getElementById('sc-frame');
-  frame.src='https://w.soundcloud.com/player/?url='+encodeURIComponent(track.url)+
-    '&auto_play='+(autoplay?'true':'false')+
-    '&buying=false&liking=false&download=false&sharing=false'+
-    '&show_artwork=false&show_comments=false&show_playcount=false'+
-    '&show_user=false&hide_related=true&visual=false&color=%23c8503a';
-  widget=SC.Widget(frame);
-  widget.bind(SC.Widget.Events.READY,function(){
-    if(offsetSecs>0)widget.seekTo(offsetSecs*1000);
-    updateNowPlaying(track,offsetSecs);
-    widgetReady=true;
-    if(autoplay)setAppState('playing');else setAppState('ready');
-  });
-  widget.bind(SC.Widget.Events.FINISH,function(){
-    if(!playing)return;
-    // Grab current artist before advancing index
-    var outArtist = tracks[currentIndex] ? tracks[currentIndex].artist : '';
-    var sync=getSyncPosition(tracks);
-    currentIndex=sync.index;
-    loadedTrackUrl=null;
-    var inTrack = tracks[currentIndex] || null;
-    // Show stage transition animation then play ident then load next track
-    mixTransition(outArtist, inTrack, function() {
-      loadTrack(tracks[currentIndex],sync.offsetSeconds,true);
-    });
-  });
-  widget.bind(SC.Widget.Events.ERROR,function(){
-    if(!playing)return;
-    console.warn('Flora: track error, skipping');
-    loadedTrackUrl=null;
-    var sync=getSyncPosition(tracks);
-    currentIndex=sync.index;
-    loadTrack(tracks[currentIndex],sync.offsetSeconds,true);
+function fireBoundary(forced, tries) {
+  var newBucket = forced ? nextBucketAfter(lastBucket) : getCurrentBucket();
+  if (!forced && newBucket === lastBucket && tries < 5) { setTimeout(function(){ fireBoundary(false, tries+1); }, 1000); return; }
+  setTimeout(scheduleBoundaryTransition, 2000);
+  if (newBucket !== lastBucket) onBoundary(newBucket);
+}
+function onBoundary(newBucket) {
+  if (playing && appState === 'playing') slotChange(newBucket);
+  else idleBoundary(newBucket);
+}
+function slotChange(newBucket) {
+  if (transitioning) return;
+  transitioning = true;
+  var prev = lastBucket; lastBucket = newBucket;
+  dlog('slot change ' + prev + ' → ' + newBucket);
+  isSpeaking = false; window.speechSynthesis.cancel(); clearInterval(identTimer);
+  highlightSlot(newBucket);
+  var info = SLOT_INFO[newBucket], pinfo = SLOT_INFO[prev] || {};
+  showStage({ outText: pinfo.name || '', inText: info.name, subText: info.time + ' · ' + info.genre, hold: 8500 });
+  ramp(100, 0, 6000, function(){
+    internalPause = true; try { widget.pause(); } catch(e) {}
+    playIdent(function(){ loadBucketAndStart(newBucket, 0); });
   });
 }
-
-function clockSyncCheck(){
-  if(!playing||!libraryLoaded||!tracks.length||transitioning)return;
-  var sync=getSyncPosition(tracks);
-  if(tracks[sync.index]&&tracks[sync.index].url!==loadedTrackUrl){
-    currentIndex=sync.index;isSpeaking=false;window.speechSynthesis.cancel();
-    loadTrack(tracks[currentIndex],sync.offsetSeconds,true);
-  }
+function loadBucketAndStart(bucket, tries) {
+  tracks = []; libraryLoaded = false; _fetchPromise = null;
+  fetchLibrary(bucket).then(function(ok){
+    if (ok && tracks.length) { startMix(0, 0); scheduleCallouts(); return; }
+    if (tries < 5) { dlog('library fetch failed — retrying'); setTimeout(function(){ loadBucketAndStart(bucket, tries+1); }, 10000); return; }
+    transitioning = false;
+    enteringEl.textContent = 'Connection problem — refresh to retry'; enteringEl.classList.add('visible');
+  });
 }
-function startSyncTimer(){clearInterval(syncCheckTimer);syncCheckTimer=setInterval(clockSyncCheck,30000);}
-function stopSyncTimer(){clearInterval(syncCheckTimer);}
+// Slot changed while nothing is playing: switch theme and quietly pre-load the new slot.
+function idleBoundary(newBucket) {
+  lastBucket = newBucket; highlightSlot(newBucket);
+  if (appState === 'loading') return;
+  tracks = []; libraryLoaded = false; _fetchPromise = null;
+  fetchLibrary(newBucket).then(function(ok){
+    if (!ok || !tracks.length) return;
+    loadedSilently(tracks[currentIndex], startOffset);
+  });
+}
+// Phones can freeze timers while locked — check the clock when the page wakes up.
+document.addEventListener('visibilitychange', function(){
+  if (document.hidden) return;
+  var b = getCurrentBucket();
+  if (b !== lastBucket && !transitioning) { dlog('slot changed while away'); onBoundary(b); scheduleBoundaryTransition(); }
+});
 
-function updateNowPlaying(track,offsetSecs){
-  if(!track)return;
-  document.getElementById('nowPlaying').classList.add('visible');
-  document.getElementById('npTitle').textContent=track.artist+' — '+track.title;
-  document.getElementById('npMeta').textContent=(track.event||'')+' · '+(track.year||'');
-  var scLink=document.getElementById('npScLink');
-  if(scLink){
-    if(track.artistSC&&track.artistSC!=='#'&&track.artistSC!==''){
-      scLink.href=track.artistSC;scLink.textContent=track.artist+' on SoundCloud ↗';scLink.style.visibility='visible';
-    }else{scLink.textContent='';scLink.style.visibility='hidden';}
-  }
-  var attrEl=document.getElementById('attribution');
-  var attrSC=document.getElementById('attrSoundcloud');
-  var attrAP=document.getElementById('attrArtistPage');
-  if(attrEl&&attrSC&&attrAP){
-    attrSC.href=track.url||'#';attrAP.href=track.artistSC||'#';
-    attrAP.textContent=track.artist+' on SoundCloud ↗';attrEl.classList.add('visible');
-  }
+// ─────────────────────────────────────────────
+// NOW PLAYING
+// ─────────────────────────────────────────────
+function updateNowPlaying(track) {
+  if (!track) return;
+  np.classList.add('visible');
+  document.getElementById('npTitle').textContent = track.artist + ' — ' + track.title;
+  document.getElementById('npMeta').textContent  = (track.event || '') + ' · ' + (track.year || '');
+  var scLink = document.getElementById('npScLink');
+  if (track.artistSC && track.artistSC !== '#') {
+    scLink.href = track.artistSC; scLink.textContent = track.artist + ' on SoundCloud ↗'; scLink.style.visibility = 'visible';
+  } else { scLink.textContent = ''; scLink.style.visibility = 'hidden'; }
+  var attrEl = document.getElementById('attribution');
+  document.getElementById('attrSoundcloud').href = track.url || '#';
+  var ap = document.getElementById('attrArtistPage');
+  ap.href = track.artistSC || '#'; ap.textContent = track.artist + ' on SoundCloud ↗';
+  attrEl.classList.add('visible');
 }
 
-// ── APP STATE MACHINE ──
-let widgetReady=false, appState='loading';
-const enteringEl=document.getElementById('transmissionLabel');
-const hintEl=document.getElementById('tapLabel');
-
-function setAppState(state){
-  appState=state;
-  if(state==='loading'){
-    btn.classList.add('loading');btn.classList.remove('tuning','playing');
-    if(enteringEl){enteringEl.textContent='Entering the transmission';enteringEl.classList.add('visible');}
-    if(hintEl)hintEl.classList.remove('visible');
+// ─────────────────────────────────────────────
+// BUTTON STATE MACHINE
+//   loading → ready → playing ⇄ paused
+//   "ready" is also used for the "Tap to continue" prompt
+// ─────────────────────────────────────────────
+function setAppState(state, label) {
+  if (state === 'playing' && appState === 'playing') return;
+  appState = state;
+  if (state === 'loading') {
+    btn.classList.add('loading'); btn.classList.remove('tuning','playing');
+    enteringEl.textContent = 'Entering the transmission'; enteringEl.classList.add('visible');
+    hintEl.classList.remove('visible');
   }
-  if(state==='ready'){
+  if (state === 'ready') {
     btn.classList.remove('loading','tuning','playing');
-    var ring=document.getElementById('loadingRing');if(ring)ring.classList.add('hidden');
+    var ring = document.getElementById('loadingRing'); if (ring) ring.classList.add('hidden');
     btn.classList.add('ready');
-    if(enteringEl)enteringEl.classList.remove('visible');
-    setTimeout(function(){if(hintEl){hintEl.textContent='Tap to listen';hintEl.classList.add('visible');}},500);
+    enteringEl.classList.remove('visible');
+    setTimeout(function(){ if (appState === 'ready') { hintEl.textContent = label || 'Tap to listen'; hintEl.classList.add('visible'); } }, 500);
   }
-  if(state==='playing'){
-    playing=true;btn.classList.remove('loading','tuning');btn.classList.add('playing');
+  if (state === 'playing') {
+    playing = true;
+    btn.classList.remove('loading','tuning'); btn.classList.add('playing');
     eq.classList.add('active');
-    if(hintEl)hintEl.classList.remove('visible');
-    if(enteringEl)enteringEl.classList.remove('visible');
+    hintEl.classList.remove('visible'); enteringEl.classList.remove('visible');
     np.classList.add('visible');
-    startSyncTimer();startSlotMonitor();runEQ();scheduleCallouts();
+    startWatchdog(); clearTimeout(eqTimer); runEQ(); scheduleCallouts();
+    if (TEST_MIX_SEC && !_testMixArmed) {
+      _testMixArmed = true;
+      setTimeout(function(){ if (playing && playerMode === 'mix' && !transitioning) { dlog('TEST: simulating end of mix'); mixEnded(); } }, TEST_MIX_SEC*1000);
+    }
   }
-  if(state==='paused'){
-    playing=false;btn.classList.remove('playing','loading','tuning');
+  if (state === 'paused') {
+    playing = false;
+    btn.classList.remove('playing','loading','tuning');
     eq.classList.remove('active');
-    clearTimeout(eqTimer);clearInterval(identTimer);clearInterval(slotMonitorTimer);stopSyncTimer();
-    bars.forEach(b=>b.style.height='3px');
-    window.speechSynthesis.cancel();isSpeaking=false;dot.classList.remove('speaking');setVol(100);
-    setTimeout(function(){if(hintEl){hintEl.textContent='Tap to listen';hintEl.classList.add('visible');}},200);
+    clearTimeout(eqTimer); clearInterval(identTimer); stopWatchdog();
+    bars.forEach(function(b){ b.style.height = '3px'; });
+    window.speechSynthesis.cancel(); isSpeaking = false; dot.classList.remove('speaking'); setVol(100);
+    setTimeout(function(){ if (appState === 'paused') { hintEl.textContent = 'Tap to listen'; hintEl.classList.add('visible'); } }, 200);
   }
 }
-
-function togglePlay(){
+function togglePlay() {
   window.speechSynthesis.getVoices();
-  if(appState==='loading')return;
-  if(appState==='ready'||appState==='paused'){if(widget){widget.play();setAppState('playing');}return;}
-  if(appState==='playing'){if(widget)widget.pause();setAppState('paused');return;}
+  if (appState === 'loading') return;
+  if (appState === 'ready' || appState === 'paused') {
+    hideStage();
+    if (widget) { widget.play(); setAppState('playing'); }
+    return;
+  }
+  if (appState === 'playing') { internalPause = true; setTimeout(function(){ internalPause = false; }, 1500); if (widget) widget.pause(); setAppState('paused'); }
+}
+function runEQ() {
+  if (!playing) return;
+  bars.forEach(function(b){ b.style.height = (Math.random() < .12 ? 2+Math.random()*3 : 4+Math.random()*18) + 'px'; });
+  eqTimer = setTimeout(runEQ, 100 + Math.random()*90);
 }
 
-function runEQ(){
-  if(!playing)return;
-  bars.forEach(b=>{b.style.height=(Math.random()<.12?2+Math.random()*3:4+Math.random()*18)+'px';});
-  eqTimer=setTimeout(runEQ,100+Math.random()*90);
-}
+// ─────────────────────────────────────────────
+// PANELS + INSTALL BANNER
+// ─────────────────────────────────────────────
+function openPanel(name) { document.getElementById('panel-'+name).classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closePanel(name) { document.getElementById('panel-'+name).classList.remove('open'); document.body.style.overflow = ''; }
+function handlePanelClick(e, name) { if (e.target === document.getElementById('panel-'+name) || e.target.classList.contains('panel-backdrop')) closePanel(name); }
+(function(){
+  if (window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches) {
+    var b = document.getElementById('installBanner'); if (b) b.classList.add('hidden'); return;
+  }
+  var isIOSd = /iPad|iPhone|iPod/.test(navigator.userAgent), isAndroid = /Android/.test(navigator.userAgent);
+  var isChrome = /Chrome/.test(navigator.userAgent) && !isIOSd, steps;
+  if (isIOSd) steps = [{n:'1',t:'Tap the <strong>Share</strong> button at the bottom of Safari'},{n:'2',t:'Tap <strong>Add to Home Screen</strong>'},{n:'3',t:'Tap <strong>Add</strong>'}];
+  else if (isChrome || isAndroid) steps = [{n:'1',t:'Tap the <strong>three dots</strong> menu in Chrome'},{n:'2',t:'Tap <strong>Add to Home Screen</strong>'},{n:'3',t:'Tap <strong>Add</strong>'}];
+  else steps = [{n:'1',t:'Open in <strong>Safari</strong> on iPhone or <strong>Chrome</strong> on Android'},{n:'2',t:'Tap the share or menu icon'},{n:'3',t:'Select <strong>Add to Home Screen</strong>'}];
+  document.getElementById('installSteps').innerHTML = steps.map(function(s){
+    return '<div class="install-step"><div class="install-step-num">'+s.n+'</div><div class="install-step-text">'+s.t+'</div></div>';
+  }).join('');
+})();
 
-// ── PANELS ──
-function openPanel(name){document.getElementById('panel-'+name).classList.add('open');document.body.style.overflow='hidden';}
-function closePanel(name){document.getElementById('panel-'+name).classList.remove('open');document.body.style.overflow='';}
-function handlePanelClick(e,name){if(e.target===document.getElementById('panel-'+name)||e.target.classList.contains('panel-backdrop'))closePanel(name);}
-
-async function fetchBucket(bucket){
-  try{
-    const res=await fetch('/api/library?bucket='+encodeURIComponent(bucket));
-    const data=await res.json();
-    if(!data.records||!data.records.length)return[];
-    return data.records.map(r=>({url:r.fields.SoundCloud_URL||'',title:r.fields.Title||'Unknown Mix',artist:r.fields.Artist||'Unknown Artist',year:r.fields.Year||'',event:r.fields.Event||'',artistSC:r.fields.Artist_SoundCloud||'#',duration:parseFloat(r.fields.Duration)||60})).filter(t=>t.url);
-  }catch(e){return[];}
-}
-
-// ── STARTUP ──
-window.speechSynthesis.onvoiceschanged=loadVoice;
+// ─────────────────────────────────────────────
+// STARTUP
+// ─────────────────────────────────────────────
+window.speechSynthesis.onvoiceschanged = loadVoice;
 loadVoice();
 highlightSlot();
 scheduleBoundaryTransition();
-
-(function(){
-  setAppState('loading');
-  fetchLibrary().then(function(ok){
-    if(!ok||!tracks.length){
-      var el=document.getElementById('transmissionLabel');
-      if(el)el.textContent='No mixes found — check Airtable';
-      return;
-    }
-    loadTrack(tracks[currentIndex],startOffset,false);
-  }).catch(function(){
-    var el=document.getElementById('transmissionLabel');
-    if(el)el.textContent='Connection error — refresh to retry';
-  });
-})();
-
-// ── INSTALL BANNER ──
-(function(){
-  if(window.navigator.standalone||window.matchMedia('(display-mode: standalone)').matches){
-    var b=document.getElementById('installBanner');if(b)b.classList.add('hidden');return;
-  }
-  var isIOSd=/iPad|iPhone|iPod/.test(navigator.userAgent);
-  var isAndroid=/Android/.test(navigator.userAgent);
-  var isChrome=/Chrome/.test(navigator.userAgent)&&!isIOSd;
-  var steps=[];
-  if(isIOSd){steps=[{num:'1',text:'Tap the <strong>Share</strong> button at the bottom of Safari'},{num:'2',text:'Tap <strong>Add to Home Screen</strong>'},{num:'3',text:'Tap <strong>Add</strong>'}];}
-  else if(isChrome||isAndroid){steps=[{num:'1',text:'Tap the <strong>three dots</strong> menu in Chrome'},{num:'2',text:'Tap <strong>Add to Home Screen</strong>'},{num:'3',text:'Tap <strong>Add</strong>'}];}
-  else{steps=[{num:'1',text:'Open in <strong>Safari</strong> on iPhone or <strong>Chrome</strong> on Android'},{num:'2',text:'Tap the share or menu icon'},{num:'3',text:'Select <strong>Add to Home Screen</strong>'}];}
-  var html='';
-  steps.forEach(s=>{html+='<div class="install-step"><div class="install-step-num">'+s.num+'</div><div class="install-step-text">'+s.text+'</div></div>';});
-  document.getElementById('installSteps').innerHTML=html;
-})();
+setAppState('loading');
+fetchLibrary().then(function(ok){
+  if (!ok || !tracks.length) { enteringEl.textContent = 'No mixes found — check Airtable'; return; }
+  loadedSilently(tracks[currentIndex], startOffset);
+}).catch(function(){ enteringEl.textContent = 'Connection error — refresh to retry'; });
 </script>
 </body>
 </html>
